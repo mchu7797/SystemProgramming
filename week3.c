@@ -6,9 +6,9 @@
 #include <ctype.h>
 
 int main(void) {
-    FILE *speechFile;
+    FILE *speechFile = fopen("d.txt", "r");
 
-    if (fopen_s(&speechFile, "d.txt", "r")) {
+    if (speechFile == NULL) {
         puts("Cannot open 'd.txt'!\n");
         return 1;
     }

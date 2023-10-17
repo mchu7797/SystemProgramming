@@ -24,12 +24,15 @@ int main(void) {
     int lineIndex = 0;
     int wordIndex = 0;
 
-    if (fopen_s(&speechFile, SPEETCH_FILENAME, "r")) {
+    speechFile = fopen(SPEETCH_FILENAME, "r");
+    outputFile = fopen(OUTPUT_FILENAME, "w+");
+
+    if (speechFile == NULL) {
         printf("Cannot open '%s'!\n", SPEETCH_FILENAME);
         return 1;
     }
 
-    if (fopen_s(&outputFile, OUTPUT_FILENAME, "w+")) {
+    if (outputFile == NULL) {
         printf("Cannot write '%s'!\n", OUTPUT_FILENAME);
         return 1;
     }
@@ -60,14 +63,16 @@ int main(void) {
     fclose(speechFile);
     fclose(outputFile);
 
-    if (fopen_s(&speechFile, OUTPUT_FILENAME, "r")) {
+    speechFile = fopen(OUTPUT_FILENAME, "r");
+
+    if (speechFile == NULL) {
         printf("Cannot open '%s'!\n", OUTPUT_FILENAME);
         return 1;
     }
 
     while (1) {
         puts("Keywords# ");
-        scanf_s("%s", keyword, 20);
+        scanf("%s", keyword);
 
         if (strncmp(keyword, "exit", 4) == 0)
             break;

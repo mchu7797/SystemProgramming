@@ -21,17 +21,17 @@ int compare_string(const char *first, const char *second, int size) {
 
 int main() {
     char *word_array = (char *) malloc(10 * 15);
-    FILE *fruit_file_stream = NULL;
+    FILE *fruit_file_stream = fopen("fruits.txt", "r");
 
-    if (fopen_s(&fruit_file_stream, "fruits.txt", "r") != 0) {
+    if (fruit_file_stream == NULL) {
         printf("Cannot open 'fruits.txt'!");
         return 1;
     }
 
     for (int i = 0; i < 10; i++) {
         char temp[15];
-        fscanf_s(fruit_file_stream, "%s", &temp, 15);
-        memcpy_s(word_array + 15 * i, 15, temp, 15);
+        fscanf(fruit_file_stream, "%s", &temp);
+        memcpy(word_array + 15 * i, 15, temp);
     }
 
     fclose(fruit_file_stream);
@@ -40,7 +40,7 @@ int main() {
         char input_word[15];
 
         printf("TYPE WORD FOR SEARCH INDEX : ");
-        scanf_s("%s", input_word, 15);
+        scanf("%s", input_word);
 
         if (compare_string("exit", input_word, 15) == 0) {
             break;

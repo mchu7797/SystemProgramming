@@ -14,9 +14,9 @@ int wordCompare(const void *input1, const void *input2) {
 }
 
 int main(void) {
-    FILE *input;
+    FILE *input = fopen(INPUT_DATA_FILENAME, "r");
 
-    if (fopen_s(&input, INPUT_DATA_FILENAME, "r")) {
+    if (input == NULL) {
         printf("Cannot open '%s'!\n", INPUT_DATA_FILENAME);
         return 1;
     }
