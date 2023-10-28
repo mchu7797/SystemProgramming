@@ -1,9 +1,7 @@
-//
-// Created by minse on 2023-10-25.
-//
-//
-// Created by minse on 2023-10-11.
-//
+// 문제 8 :
+// "a.txt"라는 파일을 작성하여, 각각의 단어를 [XXX]로 대체하여 화면에 출력하는 C 프로그램을 작성하라.
+// 단, 입력 단어가 숫자 단어면 [NUM], 레지스터면 [REG], 기타는 [ABC]로 한다.
+// 레지스터는 AX, BX, CX, DX이다.
 
 #include <stdio.h>
 #include <stdlib.h>
@@ -81,6 +79,8 @@ int main(void) {
         while (token != NULL) {
             int tokenChecked = 0;
 
+            // Detect command keywords.
+
             for (int i = 0; i < CMD_LIST_LENGTH; i++) {
                 if (strncmp(cmdList[i], token, MAX_KEYWORD_LENGTH) == 0) {
                     printf("XXX ");
@@ -95,6 +95,8 @@ int main(void) {
                 }
             }
 
+            // Detect register keywords.
+
             for (int i = 0; i < BYTE_REGISTER_LIST_LENGTH; i++) {
                 if (strncmp(byteRegisterList[i], token, MAX_KEYWORD_LENGTH) == 0) {
                     printf("REG ");
@@ -108,6 +110,8 @@ int main(void) {
                     tokenChecked = 1;
                 }
             }
+
+            // Detect is number. (hex number included.)
 
             if (isDigit(token))
             {
