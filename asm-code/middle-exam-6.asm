@@ -4,34 +4,34 @@
 ; 예제 => DATA1 DB 35, 26, 20, 3, 100, 97, 88, 15
 
 MAIN SEGMENT
-            ASSUME CS:MAIN, DS:MAIN
-            MOV BX, 0
-            MOV CX, 0
+                ASSUME CS:MAIN, DS:MAIN
+                MOV BX, 0 ; DATA1 Index
+                MOV CX, 0 ; DMAXS Index
 
-LOOP:       CMP BX, 8
-            JB COMPARE
-            JMP EXIT
+LOOP:           CMP BX, 8
+                JB COMPARE ; IF JB < 8 IS TRUE
+                JMP EXIT   ; ELSE
 
-COMPARE:    MOV SI, BX
-            MOV DH, DATA1[SI]
-            CMP DH, 50
-            JB PASS_COMP
-            JMP MOVE_MAX
+COMPARE:        MOV SI, BX
+                MOV DH, DATA1[SI]
+                CMP DH, 50
+                JB PASS_COMPARE ; IF DH < 50 IS TRUE
+                JMP MOVE_TO_MAX ; ELSE
 
-PASS_COMP:  INC BX
-            JMP LOOP
+PASS_COMPARE:   INC BX
+                JMP LOOP
 
-MOVE_MAX:   MOV SI, CX
-            MOV MAXS[SI], DH
-            INC BX
-            INC CX
-            JMP LOOP
+MOVE_TO_MAX:    MOV SI, CX
+                MOV DMAXS[SI], DH
+                INC BX
+                INC CX
+                JMP LOOP
 
-EXIT:       MOV AH, 2
-            INT 21H
+EXIT:           MOV AH, 2
+                INT 21H
 
-DATA1       DB 35, 26, 20, 3, 100, 97, 88, 15
-MAXS        DB 8 DUP(0)
+DATA1           DB 35, 26, 20, 3, 100, 97, 88, 15
+DMAXS           DB 8 DUP(0)
 
-MAIN ENDS
+MAIN            ENDS
 END

@@ -9,41 +9,41 @@
 ; DMINS DB 10 DUP(0)
 
 MAIN SEGMENT
-            ASSUME CS:MAIN, DS:MAIN
-            MOV BX, 0 ; DATA INDEX
-            MOV CX, 0 ; MAX INDEX
-            MOV DX, 0 ; MIN INDEX
+                ASSUME CS:MAIN, DS:MAIN
+                MOV AX, 0           ; DATA1, DATA2 INDEX
+                MOV BX, 0           ; DMAXS INDEX
+                MOV CX, 0           ; DMINS INDEX
 
-LOOP:       CMP BX, 8
-            JB COMPARE ; IF BX < 8 IS TRUE
-            JMP EXIT
+LOOP:           CMP AX, 8
+                JB COMPARE          ; IF AX < 8 IS TRUE
+                JMP EXIT            ; ELSE
 
-COMPARE:    MOV SI, BX
-            MOV AL, DATA1[SI]
-            ADD AL, DATA2[SI]
-            CMP AL, 100
-            JB MOVE_MIN
-            JMP MOVE_MAX
+COMPARE:        MOV SI, AX
+                MOV DL, DATA1[SI]
+                ADD DL, DATA2[SI]
+                CMP DL, 100 
+                JB MOVE_TO_DMINS    ; IF DL < 100 IS TRUE
+                JMP MOVE_TO_DMAXS   ; ELSE
 
-MOVE_MAX:   MOV SI, CX
-            MOV DMAXS[SI], AL
-            INC BX
-            INC CX
-            JMP LOOP
+MOVE_TO_DMAXS:  MOV SI, BX
+                MOV DMAXS[SI], DL
+                INC AX
+                INC BX
+                JMP LOOP
 
-MOVE_MIN:   MOV SI, DX
-            MOV DMINS[SI], AL
-            INC BX
-            INC DX
-            JMP LOOP
+MOVE_TO_DMINS:  MOV SI, CX
+                MOV DMINS[SI], DL
+                INC AX
+                INC CX
+                JMP LOOP
 
-EXIT:       MOV AH, 2
-            INT 21H
+EXIT:           MOV AH, 2           ; 콘솔 종료 설정
+                INT 21H             ; 인터럽트 실행
 
-DATA1       DB 35, 26, 20, 3, 100, 97, 88, 15
-DATA2       DB 15, 36, 64, 90, 10, 21, 32, 1
-DMAXS       DB 8 DUP(0)
-DMINS       DB 8 DUP(0)
+DATA1           DB 35, 26, 20, 3, 100, 97, 88, 15
+DATA2           DB 15, 36, 64, 90, 10, 21, 32, 1
+DMAXS           DB 8 DUP(0)
+DMINS           DB 8 DUP(0)
 
-MAIN ENDS
+MAIN            ENDS
 END
