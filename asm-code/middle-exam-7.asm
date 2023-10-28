@@ -8,7 +8,7 @@
 ; DMAXS DB 10 DUP(0)
 ; DMINS DB 10 DUP(0)
 
-MAIN SEGMENT
+MAIN            SEGMENT
                 ASSUME CS:MAIN, DS:MAIN
                 MOV AX, 0           ; DATA1, DATA2 INDEX
                 MOV BX, 0           ; DMAXS INDEX

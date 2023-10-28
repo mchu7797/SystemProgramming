@@ -3,7 +3,7 @@
 ; 그 중 50보다 큰 수를 DMAXS 배열에 저장하고, 그 결과 메모리 모습을 보여라.
 ; 예제 => DATA1 DB 35, 26, 20, 3, 100, 97, 88, 15
 
-MAIN SEGMENT
+MAIN            SEGMENT
                 ASSUME CS:MAIN, DS:MAIN
                 MOV BX, 0 ; DATA1 Index
                 MOV CX, 0 ; DMAXS Index
