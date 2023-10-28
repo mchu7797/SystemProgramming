@@ -3,12 +3,13 @@ project(SystemProgramming C)
 
 set(CMAKE_C_STANDARD 11)
 
-add_executable(Week1 week1.c)
-add_executable(Week2 week2.c)
-add_executable(Week3 week3.c)
-add_executable(Week4 week4.c)
-add_executable(Week5 week5.c)
-add_executable(Week6 week6.c)
+add_executable(Week1 c-code/week1.c)
+add_executable(Week2 c-code/week2.c)
+add_executable(Week3 c-code/week3.c)
+add_executable(Week4 c-code/week4.c)
+add_executable(Week5 c-code/week5.c)
+add_executable(Week6 c-code/week6.c)
+add_executable(MiddleExam c-code/middle_exam.c)
 
 # for execute week2
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/fruits.txt ${CMAKE_CURRENT_BINARY_DIR}/fruits.txt COPYONLY)
