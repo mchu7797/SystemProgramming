@@ -14,32 +14,32 @@
 #define SHORT_REGISTER_LIST_LENGTH 13
 
 char cmdList[CMD_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {
-    "MOV", "ADD", "JMP", "CMP",
-    "INT", "JBE", "INC", "SUM"
+        "MOV", "ADD", "JMP", "CMP",
+        "INT", "JBE", "INC", "SUM"
 };
 
 char pcmdList[PCMD_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {
-    "ASSUME",
-    "DEFINE",
-    "WORD",
-    "END",
-    "ENDS",
-    "SEGMENT"
+        "ASSUME",
+        "DEFINE",
+        "WORD",
+        "END",
+        "ENDS",
+        "SEGMENT"
 };
 
 char byteRegisterList[BYTE_REGISTER_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {
-    "AH", "AL",
-    "BH", "BL",
-    "CH", "CL",
-    "DH", "DL"
+        "AH", "AL",
+        "BH", "BL",
+        "CH", "CL",
+        "DH", "DL"
 };
 
 char shortRegisterList[SHORT_REGISTER_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {
-    "AX", "BX", "CX",
-    "DX", "CS", "IP",
-    "SS", "SP", "BP",
-    "SI", "DI", "DS",
-    "ES"
+        "AX", "BX", "CX",
+        "DX", "CS", "IP",
+        "SS", "SP", "BP",
+        "SI", "DI", "DS",
+        "ES"
 };
 
 int isDigit(const char *word) {
@@ -64,7 +64,7 @@ int isDigit(const char *word) {
     return 1;
 }
 
-int main(void) {    
+int main(void) {
     FILE *asmFile = fopen(DEFAULT_SOURCE_FILENAME, "r");
     if (asmFile == NULL) {
         printf("Failed to open '%s'!\n", DEFAULT_SOURCE_FILENAME);
@@ -72,7 +72,7 @@ int main(void) {
     }
 
     char asmLine[80], *token;
-    while(fgets(asmLine, 80, asmFile) != NULL) {
+    while (fgets(asmLine, 80, asmFile) != NULL) {
         printf("%s", asmLine);
         printf("PARSED : ");
 
@@ -90,8 +90,8 @@ int main(void) {
 
             for (int i = 0; i < PCMD_LIST_LENGTH; i++) {
                 if (strncmp(pcmdList[i], token, MAX_KEYWORD_LENGTH) == 0) {
-                   printf("PCMD ");
-                   tokenChecked = 1;
+                    printf("PCMD ");
+                    tokenChecked = 1;
                 }
             }
 
@@ -109,8 +109,7 @@ int main(void) {
                 }
             }
 
-            if (isDigit(token))
-            {
+            if (isDigit(token)) {
                 printf("NUM ");
                 tokenChecked = 1;
             }

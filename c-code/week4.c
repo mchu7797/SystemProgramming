@@ -98,7 +98,7 @@ int main(void) {
                     wordIndex++;
                 }
             } else {
-                extractedWord[extractedWordIndex++] = (char)character;
+                extractedWord[extractedWordIndex++] = (char) character;
             }
 
             characterHistory = character;

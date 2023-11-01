@@ -10,7 +10,7 @@
 #define WORD_MAX_LENGTH 20
 
 int wordCompare(const void *input1, const void *input2) {
-    return strncmp(*((char**)input1), *((char**)input2), WORD_MAX_LENGTH);
+    return strncmp(*((char **) input1), *((char **) input2), WORD_MAX_LENGTH);
 }
 
 int main(void) {
@@ -27,8 +27,8 @@ int main(void) {
     inputSize = ftell(input);
     fseek(input, 0, SEEK_SET);
 
-    char *inputBinary = (char*)malloc(inputSize);
-    char **wordList = (char**)malloc(sizeof(char*) * (inputSize - 1));
+    char *inputBinary = (char *) malloc(inputSize);
+    char **wordList = (char **) malloc(sizeof(char *) * (inputSize - 1));
 
     fread(inputBinary, sizeof(char), inputSize, input);
 
@@ -42,7 +42,7 @@ int main(void) {
         wordToken = strtok(NULL, " \n");
     }
 
-    qsort(wordList, wordListLength, sizeof(char*), wordCompare);
+    qsort(wordList, wordListLength, sizeof(char *), wordCompare);
 
     while (1) {
         char inputKeyword[20];

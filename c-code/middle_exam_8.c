@@ -73,7 +73,7 @@ int main(void) {
     }
 
     char asmLine[80], *token;
-    while(fgets(asmLine, 80, asmFile) != NULL) {
+    while (fgets(asmLine, 80, asmFile) != NULL) {
         token = strtok(asmLine, " ,:\n");
 
         while (token != NULL) {
@@ -113,8 +113,7 @@ int main(void) {
 
             // Detect is number. (hex number included.)
 
-            if (isDigit(token))
-            {
+            if (isDigit(token)) {
                 printf("NUM ");
                 tokenChecked = 1;
             }
