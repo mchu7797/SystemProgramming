@@ -5,21 +5,23 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <stdlib.h>
 
 #define ASM_FILENAME "input.asm"
 
-struct macro_data {
-    char keyword[10];
-    char data_file_path[20];
-};
 
-int parse_macro(char *asm_filename, struct macro_data macro_list[]) {
+
+int parse_macro(char *asm_filename, char) {
+    int macro_list_length = 10;
+    macro_list = init_macro_list(macro_list_length);
+
     FILE *asm_file = fopen(asm_filename, "r");
 
     if (asm_file == NULL) {
         return 1;
     }
 
+    fclose(asm_file);
     return 0;
 }
 
@@ -30,6 +32,7 @@ int parse_assembly(char *asm_filename, struct macro_data macro_list[]) {
         return 1;
     }
 
+    fclose(asm_file);
     return 0;
 }
 
