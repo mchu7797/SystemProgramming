@@ -1,6 +1,5 @@
 //
 // Created by Minseok Chu on 11/1/23.
-// Work in Progress
 //
 
 #include <stdio.h>
@@ -43,17 +42,13 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
                 strcat(macro_keyword, ".TXT");
                 strcpy((*macro_table)[*macro_table_length].filename, macro_keyword);
 
-                (*macro_table_length)++;
-
-                printf("Keyword : %s\n", macro_table[*macro_table_length]->keyword);
-                printf("Path : %s\n", macro_table[*macro_table_length]->filename);
-
-                macro_file = fopen(macro_table[*macro_table_length]->filename, "w");
+                macro_file = fopen((*macro_table)[*macro_table_length].filename, "w");
                 macro_mode = 1;
             }
 
             if (strncmp(token, "ENDM", 4) == 0) {
-                if (strcmp(token_history, macro_table[*macro_table_length]->keyword) == 0) {
+                if (strcmp(token_history, (*macro_table)[*macro_table_length].keyword) == 0) {
+                    (*macro_table_length)++;
                     fclose(macro_file);
                     macro_mode = 0;
                 }
@@ -88,72 +83,82 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
     return 0;
 }
 
-int parse_assembly(char *asm_filename, struct macro_info *macro_table, int macro_table_length) {
+int print_macro(char *macro_filename) {
+    FILE *macro_file = fopen(macro_filename, "r");
+
+    if (macro_file == NULL) {
+        return 1;
+    }
+
+    int c;
+
+    while ((c = getc(macro_file)) != EOF) {
+        putchar(c);
+    }
+
+    fclose(macro_file);
+
+    return 0;
+}
+
+int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro_table_length) {
     FILE *asm_file = fopen(asm_filename, "r");
 
     if (asm_file == NULL) {
         return 1;
     }
 
-    int macro_detected = 0;
+    // It detects macro call or macro block ends.
+    int macro_flag = 0;
+    int macro_block_detected = 0;
 
     char asm_data[35];
-    long asm_offset = ftell(asm_file);
+    long asm_file_offset = ftell(asm_file);
 
     while (fgets(asm_data, 35, asm_file) != NULL) {
         char *token = strtok(asm_data, " ,:\n");
 
         while (token != NULL) {
             if (strncmp(token, "MACRO", 5) == 0) {
-                macro_detected = 1;
+                macro_block_detected = 1;
             }
 
             if (strncmp(token, "ENDM", 4) == 0) {
-                macro_detected = -1;
-            }
-
-            for (int i = 0; i < macro_table_length; i++) {
-                if (strcmp(macro_table[i].keyword, token) != 0) {
-                    continue;
-                }
-
-                if (token - asm_data > 0) {
-                    for (int j = 0; j < (token - asm_data); j++) {
-                        putchar(asm_data[i]);
-                    }
-                }
-
-                FILE *macro_file = fopen(macro_table[i].filename, "r");
-                int c;
-
-                while ((c = getc(macro_file)) != EOF) {
-                    putchar(c);
-                }
-
-                fclose(macro_file);
-
-                macro_detected = -1;
+                macro_block_detected = 0;
+                macro_flag = 1;
             }
 
             token = strtok(NULL, " ,:\n");
         }
 
-        if (!macro_detected) {
-            int c;
-            fseek(asm_file, asm_offset, SEEK_SET);
+        token = strtok(asm_data, " ,:\n");
 
-            while ((c = fgetc(asm_file)) != '\n') {
-                putchar(c);
+        while (token != NULL && !macro_block_detected && !macro_flag) {
+            for (int i = 0; i < macro_table_length; i++) {
+                if (strcmp(macro_table[i].keyword, token) != 0) {
+                    continue;
+                }
+
+                if (print_macro(macro_table[i].filename)) {
+                    return 1;
+                } else {
+                    macro_flag = 1;
+                }
             }
 
+            token = strtok(NULL, " ,:\n");
+        }
+
+        if (!(macro_flag || macro_block_detected)) {
+            fseek(asm_file, asm_file_offset, SEEK_SET);
+            int c;
+
+            while ((c = fgetc(asm_file)) != '\n') { putchar(c); }
             putchar('\n');
         }
 
-        if (macro_detected < 0) {
-            macro_detected = 0;
-        }
-
-        asm_offset = ftell(asm_file);
+        macro_flag = macro_flag == 1 ? 0 : macro_flag;
+        asm_file_offset = ftell(asm_file);
     }
 
     if (!feof(asm_file)) {
@@ -174,9 +179,9 @@ int main(void) {
         return 1;
     }
 
-    if (parse_assembly(ASM_FILENAME, macro_table, macro_table_length)) {
+    if (print_assembly(ASM_FILENAME, macro_table, macro_table_length)) {
         // If execution does not work properly
-        puts("Execution Failed : PARSING ASSEMBLY");
+        puts("Execution Failed : PRINTING ASSEMBLY");
         return 1;
     }
 
