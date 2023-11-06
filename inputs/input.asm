@@ -13,7 +13,7 @@ ASSUME CS:MAIN, DS:MAIN
     MOV CX, 1
     MOV AX, 0
 LOOP1:
-    HELLO
+    CALL HELLO
     ADD AX, CX
     INC CX
     CMP CX, 10
@@ -22,7 +22,7 @@ LOOP1:
     MOV AH, 4CH
     INT 21H
     SUM DW ?
-    HI
-    HELLO
+    CALL HELLO
+    CALL HI
 MAIN ENDS
 END

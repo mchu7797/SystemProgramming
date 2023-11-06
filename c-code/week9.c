@@ -108,48 +108,56 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
         return 1;
     }
 
-    // It detects macro call or macro block ends.
+    // It represents detected macro calls or macro block
+    // 3 => Macro block starts
+    // 2 => Macro block ends
+    // 1 => Macro call
+    // 0 => Isn't macro
     int macro_flag = 0;
-    int macro_block_detected = 0;
 
-    char asm_data[35];
+    char asm_data[35] = { 0 };
     long asm_file_offset = ftell(asm_file);
 
-    while (fgets(asm_data, 35, asm_file) != NULL) {
-        char *token = strtok(asm_data, " ,:\n");
+    while (fgets(asm_data, sizeof(asm_data), asm_file) != NULL) {
+        char *token;
+
+        token = strtok(asm_data, " \n");
 
         while (token != NULL) {
             if (strncmp(token, "MACRO", 5) == 0) {
-                macro_block_detected = 1;
+                macro_flag = 3;
             }
 
             if (strncmp(token, "ENDM", 4) == 0) {
-                macro_block_detected = 0;
+                macro_flag = 2;
+            }
+
+            if (strncmp(token, "CALL", 4) == 0) {
                 macro_flag = 1;
             }
 
-            token = strtok(NULL, " ,:\n");
+            token = strtok(NULL, " \n");
         }
 
-        token = strtok(asm_data, " ,:\n");
+        // Needs to re-read line because strtok() modifies delimiter char to null char
+        fseek(asm_file, asm_file_offset, SEEK_SET);
+        fgets(asm_data, 35, asm_file);
 
-        while (token != NULL && !macro_block_detected && !macro_flag) {
+        token = strtok(asm_data, " \n");
+
+        while (token != NULL && macro_flag == 1) {
             for (int i = 0; i < macro_table_length; i++) {
-                if (strcmp(macro_table[i].keyword, token) != 0) {
-                    continue;
-                }
-
-                if (print_macro(macro_table[i].filename)) {
-                    return 1;
-                } else {
-                    macro_flag = 1;
+                if (strcmp(token, macro_table[i].keyword) == 0) {
+                    if (print_macro(macro_table[i].filename)) {
+                        return 1;
+                    }
                 }
             }
 
-            token = strtok(NULL, " ,:\n");
+            token = strtok(NULL, " \n");
         }
 
-        if (!(macro_flag || macro_block_detected)) {
+        if (!macro_flag) {
             fseek(asm_file, asm_file_offset, SEEK_SET);
             int c;
 
@@ -157,7 +165,10 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
             putchar('\n');
         }
 
-        macro_flag = macro_flag == 1 ? 0 : macro_flag;
+        if (macro_flag < 3) {
+            macro_flag = 0;
+        }
+
         asm_file_offset = ftell(asm_file);
     }
 
