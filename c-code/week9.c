@@ -163,7 +163,16 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
             fseek(asm_file, asm_file_offset, SEEK_SET);
             int c;
 
-            while ((c = fgetc(asm_file)) != '\n') { putchar(c); }
+            for (int i = 0; i < 35; i++) {
+                c = fgetc(asm_file);
+
+                if (c == '\n' || c == EOF) {
+                    break;
+                }
+
+                putchar(c);
+            }
+
             putchar('\n');
         }
 
@@ -174,6 +183,7 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
         asm_file_offset = ftell(asm_file);
     }
 
+    // When cannot read properly
     if (!feof(asm_file)) {
         return 1;
     }
