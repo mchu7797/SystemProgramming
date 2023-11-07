@@ -31,7 +31,7 @@ int main() {
     for (int i = 0; i < 10; i++) {
         char temp[15];
         fscanf(fruit_file_stream, "%s", &temp);
-        memcpy(word_array + 15 * i, 15, temp);
+        memcpy(word_array + 15 * i, temp, 15);
     }
 
     fclose(fruit_file_stream);
