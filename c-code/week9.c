@@ -7,6 +7,7 @@
 #include <stdlib.h>
 
 #define ASM_FILENAME "input.asm"
+#define ASM_LINE_LENGTH 80
 
 struct macro_info {
     char keyword[15];
@@ -14,22 +15,19 @@ struct macro_info {
 };
 
 int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_table_length) {
-    *macro_table = (struct macro_info *) malloc(sizeof(struct macro_info) * 10);
-    *macro_table_length = 0;
-
     FILE *asm_file = fopen(asm_filename, "r");
 
     if (asm_file == NULL) {
         return 1;
     }
 
-    char asm_data[35];
+    char asm_data[ASM_LINE_LENGTH];
     long asm_pos = ftell(asm_file);
 
     int macro_mode = 0;
     FILE *macro_file;
 
-    while (fgets(asm_data, 35, asm_file) != NULL) {
+    while (fgets(asm_data, ASM_LINE_LENGTH, asm_file) != NULL) {
         char *token = strtok(asm_data, " ,:\n");
         char *token_history = asm_data;
 
@@ -115,10 +113,10 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
     // 0 => Isn't macro
     int macro_flag = 0;
 
-    char asm_data[35] = { 0 };
+    char asm_data[ASM_LINE_LENGTH] = {0};
     long asm_file_offset = ftell(asm_file);
 
-    while (fgets(asm_data, sizeof(asm_data), asm_file) != NULL) {
+    while (fgets(asm_data, ASM_LINE_LENGTH, asm_file) != NULL) {
         char *token;
 
         token = strtok(asm_data, " \n");
@@ -143,7 +141,7 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
         // Example :
         // "Hello, world" -> strtok(STR, " ") -> "Hello,\0world"
         fseek(asm_file, asm_file_offset, SEEK_SET);
-        fgets(asm_data, 35, asm_file);
+        fgets(asm_data, ASM_LINE_LENGTH, asm_file);
 
         token = strtok(asm_data, " \n");
 
@@ -163,7 +161,7 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
             fseek(asm_file, asm_file_offset, SEEK_SET);
             int c;
 
-            for (int i = 0; i < 35; i++) {
+            for (int i = 0; i < ASM_LINE_LENGTH; i++) {
                 c = fgetc(asm_file);
 
                 if (c == '\n' || c == EOF) {
@@ -193,8 +191,8 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
 }
 
 int main(void) {
-    struct macro_info *macro_table;
-    int macro_table_length;
+    struct macro_info *macro_table = (struct macro_info *) malloc(sizeof(struct macro_info) * 10);
+    int macro_table_length = 0;
 
     if (parse_macro(ASM_FILENAME, &macro_table, &macro_table_length)) {
         // If execution does not work properly
