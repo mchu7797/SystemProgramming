@@ -47,7 +47,7 @@ int main(void) {
     while (1) {
         char inputKeyword[20];
 
-        puts("Keyword# ");
+        printf("Keyword# ");
         scanf("%s", inputKeyword);
 
         if (strcmp(inputKeyword, "exit") == 0) {

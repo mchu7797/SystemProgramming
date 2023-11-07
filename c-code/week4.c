@@ -71,7 +71,7 @@ int main(void) {
     }
 
     while (1) {
-        puts("Keywords# ");
+        printf("Keywords# ");
         scanf("%s", keyword);
 
         if (strncmp(keyword, "exit", 4) == 0)
