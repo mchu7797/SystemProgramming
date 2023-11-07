@@ -140,6 +140,8 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
         }
 
         // Needs to re-read line because strtok() modifies delimiter char to null char
+        // Example :
+        // "Hello, world" -> strtok(STR, " ") -> "Hello,\0world"
         fseek(asm_file, asm_file_offset, SEEK_SET);
         fgets(asm_data, 35, asm_file);
 
