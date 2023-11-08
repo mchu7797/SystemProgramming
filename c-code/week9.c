@@ -6,7 +6,7 @@
 #include <string.h>
 #include <stdlib.h>
 
-#define ASM_FILENAME "input.asm"
+#define ASM_FILENAME "week9.asm"
 #define ASM_LINE_LENGTH 80
 
 struct macro_info {
