@@ -28,11 +28,11 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
     FILE *macro_file;
 
     while (fgets(asm_data, ASM_LINE_LENGTH, asm_file) != NULL) {
-        char *token = strtok(asm_data, " ,:\n");
+        char *token = strtok(asm_data, " ,:\n\t");
         char *token_history = asm_data;
 
         while (token != NULL) {
-            if (strncmp(token, "MACRO", 5) == 0) {
+            if (strncmp(token, "KMAC", 4) == 0) {
                 char macro_keyword[20];
                 strcpy(macro_keyword, token_history);
 
@@ -44,16 +44,14 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
                 macro_mode = 1;
             }
 
-            if (strncmp(token, "ENDM", 4) == 0) {
-                if (strcmp(token_history, (*macro_table)[*macro_table_length].keyword) == 0) {
-                    (*macro_table_length)++;
-                    fclose(macro_file);
-                    macro_mode = 0;
-                }
+            if (strncmp(token, "ENDK", 4) == 0) {
+                (*macro_table_length)++;
+                fclose(macro_file);
+                macro_mode = 0;
             }
 
             token_history = token;
-            token = strtok(NULL, " ,:\n");
+            token = strtok(NULL, " ,:\n\t");
         }
 
         if (macro_mode > 1) {
@@ -119,22 +117,18 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
     while (fgets(asm_data, ASM_LINE_LENGTH, asm_file) != NULL) {
         char *token;
 
-        token = strtok(asm_data, " \n");
+        token = strtok(asm_data, " \n\t");
 
         while (token != NULL) {
-            if (strncmp(token, "MACRO", 5) == 0) {
+            if (strncmp(token, "KMAC", 4) == 0) {
                 macro_flag = 3;
             }
 
-            if (strncmp(token, "ENDM", 4) == 0) {
-                macro_flag = 2;
-            }
-
-            if (strncmp(token, "CALL", 4) == 0) {
+            if (strncmp(token, "ENDK", 4) == 0) {
                 macro_flag = 1;
             }
 
-            token = strtok(NULL, " \n");
+            token = strtok(NULL, " \n\t");
         }
 
         // Needs to re-read line because strtok() modifies delimiter char to null char
@@ -143,18 +137,20 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
         fseek(asm_file, asm_file_offset, SEEK_SET);
         fgets(asm_data, ASM_LINE_LENGTH, asm_file);
 
-        token = strtok(asm_data, " \n");
+        token = strtok(asm_data, " \n\t");
 
-        while (token != NULL && macro_flag == 1) {
+        while (token != NULL && !macro_flag) {
             for (int i = 0; i < macro_table_length; i++) {
                 if (strcmp(token, macro_table[i].keyword) == 0) {
                     if (print_macro(macro_table[i].filename)) {
                         return 1;
+                    } else {
+                        macro_flag = 1;
                     }
                 }
             }
 
-            token = strtok(NULL, " \n");
+            token = strtok(NULL, " \n\t");
         }
 
         if (!macro_flag) {
