@@ -4,10 +4,11 @@
 
 #include <stdio.h>
 
-int main(void) {
+int
+main(void) {
     char character = 'Q';
     int number = 72;
-    char *string = "Phoenix";
+    char* string = "Phoenix";
 
     int string_length = 0;
 

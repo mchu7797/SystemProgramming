@@ -6,12 +6,14 @@
 #include <stdlib.h>
 #include <string.h>
 
-int compare_string(const char *first, const char *second, int size) {
+int
+compare_string(const char* first, const char* second, int size) {
     int compareFlag = 0;
 
     for (int i = 0; i < size; ++i) {
-        if (*(first + i) == 0 || *(second + i) == 0)
+        if (*(first + i) == 0 || *(second + i) == 0) {
             break;
+        }
 
         compareFlag += *(first + i) - *(second + i);
     }
@@ -19,9 +21,10 @@ int compare_string(const char *first, const char *second, int size) {
     return compareFlag;
 }
 
-int main() {
-    char *word_array = (char *) malloc(10 * 15);
-    FILE *fruit_file_stream = fopen("fruits.txt", "r");
+int
+main() {
+    char* word_array = (char*)malloc(10 * 15);
+    FILE* fruit_file_stream = fopen("fruits.txt", "r");
 
     if (fruit_file_stream == NULL) {
         printf("Cannot open 'fruits.txt'!");

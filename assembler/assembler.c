@@ -10,25 +10,26 @@
 struct variable_info {
     // 8 bits or 16 bits. (DB, DW)
     int data_kinds;
-    char *data_binary;
+    char* data_binary;
 };
 
 struct keywords_info {
     char keyword[10];
     int memory_offsets;
     int is_variable;
-    struct variable_info *variableInfo;
+    struct variable_info* variableInfo;
 };
 
-int extract_data_symbols(char *filename, struct keywords_info **data_symbols, int *data_symbols_length) {
-    FILE *assembly_file = fopen(filename, "r");
+int
+extract_data_symbols(char* filename, struct keywords_info** data_symbols, int* data_symbols_length) {
+    FILE* assembly_file = fopen(filename, "r");
     if (assembly_file == NULL) {
         puts("Error: Cannot open assembly file!");
         return 1;
     }
 
     if (*data_symbols == NULL) {
-        *data_symbols = (char *)malloc(sizeof(struct keywords_info) * 15);
+        *data_symbols = (char*)malloc(sizeof(struct keywords_info) * 15);
         *data_symbols_length = 15;
     }
 
@@ -39,7 +40,7 @@ int extract_data_symbols(char *filename, struct keywords_info **data_symbols, in
     assembly_data_length = ftell(assembly_file);
     fseek(assembly_file, 0, SEEK_SET);
 
-    assembly_data = (char *)malloc(assembly_data_length);
+    assembly_data = (char*)malloc(assembly_data_length);
     fread(assembly_data, 1, assembly_data_length, assembly_file);
 
     char* keyword_token = strtok(assembly_data, " :,\r\n\t");
@@ -74,13 +75,11 @@ int extract_data_symbols(char *filename, struct keywords_info **data_symbols, in
         }
     }
 
-
-
     free(assembly_data);
 }
 
-int main() {
-
+int
+main() {
 
     return 0;
 }

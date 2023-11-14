@@ -2,14 +2,16 @@
 // Created by minse on 2023-10-03.
 //
 
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
 #include <string.h>
 
-#define SPEETCH_FILENAME "d.txt"
-#define OUTPUT_FILENAME "d.new.txt"
 
-int main(void) {
+#define SPEETCH_FILENAME "d.txt"
+#define OUTPUT_FILENAME  "d.new.txt"
+
+int
+main(void) {
     FILE *speechFile, *outputFile;
     int character = 0;
     int characterHistory = 0;
@@ -74,8 +76,9 @@ int main(void) {
         printf("Keywords# ");
         scanf("%s", keyword);
 
-        if (strncmp(keyword, "exit", 4) == 0)
+        if (strncmp(keyword, "exit", 4) == 0) {
             break;
+        }
 
         lineIndex = 0;
         wordIndex = 0;
@@ -98,7 +101,7 @@ int main(void) {
                     wordIndex++;
                 }
             } else {
-                extractedWord[extractedWordIndex++] = (char) character;
+                extractedWord[extractedWordIndex++] = (char)character;
             }
 
             characterHistory = character;

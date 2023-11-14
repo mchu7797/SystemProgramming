@@ -2,11 +2,13 @@
 // Created by Minseok Chu on 2023-09-20.
 //
 
-#include <stdio.h>
 #include <ctype.h>
+#include <stdio.h>
 
-int main(void) {
-    FILE *speechFile = fopen("d.txt", "r");
+
+int
+main(void) {
+    FILE* speechFile = fopen("d.txt", "r");
 
     if (speechFile == NULL) {
         puts("Cannot open 'd.txt'!\n");
@@ -21,11 +23,13 @@ int main(void) {
     int last = 0;
 
     while ((tempChar = fgetc(speechFile)) != EOF) {
-        if (tempChar >= '0' && tempChar <= '9')
+        if (tempChar >= '0' && tempChar <= '9') {
             numCount++;
+        }
 
-        if (isspace(tempChar) && !isspace(last))
+        if (isspace(tempChar) && !isspace(last)) {
             wordCount++;
+        }
 
         charCount++;
         last = tempChar;

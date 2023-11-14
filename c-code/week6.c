@@ -6,43 +6,24 @@
 #include <stdlib.h>
 #include <string.h>
 
-#define DEFAULT_SOURCE_FILENAME "input.asm"
-#define MAX_KEYWORD_LENGTH 10
-#define CMD_LIST_LENGTH 8
-#define PCMD_LIST_LENGTH 6
-#define BYTE_REGISTER_LIST_LENGTH 8
+#define DEFAULT_SOURCE_FILENAME    "input.asm"
+#define MAX_KEYWORD_LENGTH         10
+#define CMD_LIST_LENGTH            8
+#define PCMD_LIST_LENGTH           6
+#define BYTE_REGISTER_LIST_LENGTH  8
 #define SHORT_REGISTER_LIST_LENGTH 13
 
-char cmdList[CMD_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {
-        "MOV", "ADD", "JMP", "CMP",
-        "INT", "JBE", "INC", "SUM"
-};
+char cmdList[CMD_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {"MOV", "ADD", "JMP", "CMP", "INT", "JBE", "INC", "SUM"};
 
-char pcmdList[PCMD_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {
-        "ASSUME",
-        "DEFINE",
-        "WORD",
-        "END",
-        "ENDS",
-        "SEGMENT"
-};
+char pcmdList[PCMD_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {"ASSUME", "DEFINE", "WORD", "END", "ENDS", "SEGMENT"};
 
-char byteRegisterList[BYTE_REGISTER_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {
-        "AH", "AL",
-        "BH", "BL",
-        "CH", "CL",
-        "DH", "DL"
-};
+char byteRegisterList[BYTE_REGISTER_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {"AH", "AL", "BH", "BL", "CH", "CL", "DH", "DL"};
 
-char shortRegisterList[SHORT_REGISTER_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {
-        "AX", "BX", "CX",
-        "DX", "CS", "IP",
-        "SS", "SP", "BP",
-        "SI", "DI", "DS",
-        "ES"
-};
+char shortRegisterList[SHORT_REGISTER_LIST_LENGTH][MAX_KEYWORD_LENGTH] = {"AX", "BX", "CX", "DX", "CS", "IP", "SS",
+                                                                          "SP", "BP", "SI", "DI", "DS", "ES"};
 
-int isDigit(const char *word) {
+int
+isDigit(const char* word) {
     int hexFlag = 0;
     int index = 1;
 
@@ -64,8 +45,9 @@ int isDigit(const char *word) {
     return 1;
 }
 
-int main(void) {
-    FILE *asmFile = fopen(DEFAULT_SOURCE_FILENAME, "r");
+int
+main(void) {
+    FILE* asmFile = fopen(DEFAULT_SOURCE_FILENAME, "r");
     if (asmFile == NULL) {
         printf("Failed to open '%s'!\n", DEFAULT_SOURCE_FILENAME);
         return EXIT_FAILURE;

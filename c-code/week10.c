@@ -10,8 +10,9 @@
 
 #define ASM_FILENAME "week10.asm"
 
-int extract_data_symbol_keywords(char *filename, char *data_symbol_list, int *data_symbol_list_length) {
-    FILE *asm_file = fopen(filename, "r");
+int
+extract_data_symbol_keywords(char* filename, char* data_symbol_list, int* data_symbol_list_length) {
+    FILE* asm_file = fopen(filename, "r");
 
     if (asm_file == NULL) {
         puts("ERROR: Cannot open assembly file!");
@@ -22,8 +23,8 @@ int extract_data_symbol_keywords(char *filename, char *data_symbol_list, int *da
     int data_symbol_list_index = 0;
 
     while (fgets(asm_data, 80, asm_file) != NULL) {
-        char *token = strtok(asm_data, " :,\n\t");
-        char *token_before = NULL;
+        char* token = strtok(asm_data, " :,\n\t");
+        char* token_before = NULL;
 
         while (token != NULL) {
             for (int i = 0; i < DATA_DEFINE_LIST_LENGTH; i++) {
@@ -54,8 +55,9 @@ int extract_data_symbol_keywords(char *filename, char *data_symbol_list, int *da
     return 0;
 }
 
-int print_assembly_code(char *filename, char* data_symbol_list, int data_symbol_list_length) {
-    FILE *asm_file = fopen(filename, "r");
+int
+print_assembly_code(char* filename, char* data_symbol_list, int data_symbol_list_length) {
+    FILE* asm_file = fopen(filename, "r");
 
     if (asm_file == NULL) {
         puts("ERROR: Cannot open assembly file!");
@@ -68,16 +70,16 @@ int print_assembly_code(char *filename, char* data_symbol_list, int data_symbol_
         char asm_data_for_print[80];
         strncpy(asm_data_for_print, asm_data, 80);
 
-        char *print_token = strtok(asm_data_for_print, " \t\n");
+        char* print_token = strtok(asm_data_for_print, " \t\n");
 
-        while(print_token != NULL) {
+        while (print_token != NULL) {
             printf("%s ", print_token);
             print_token = strtok(NULL, " \t\n");
         }
 
         printf("\n");
 
-        char *token = strtok(asm_data, " :,\n\t");
+        char* token = strtok(asm_data, " :,\n\t");
 
         while (token != NULL) {
             int command_found = 0;
@@ -135,9 +137,10 @@ int print_assembly_code(char *filename, char* data_symbol_list, int data_symbol_
     return 0;
 }
 
-int main() {
+int
+main() {
     int data_symbol_list_length = 10;
-    char *data_symbol_list = (char*)malloc(data_symbol_list_length);
+    char* data_symbol_list = (char*)malloc(data_symbol_list_length);
 
     if (extract_data_symbol_keywords(ASM_FILENAME, data_symbol_list, &data_symbol_list_length)) {
         puts("Program exited cause of above error!");

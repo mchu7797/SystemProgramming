@@ -3,10 +3,10 @@
 //
 
 #include <stdio.h>
-#include <string.h>
 #include <stdlib.h>
+#include <string.h>
 
-#define ASM_FILENAME "week9.asm"
+#define ASM_FILENAME    "week9.asm"
 #define ASM_LINE_LENGTH 80
 
 struct macro_info {
@@ -14,14 +14,15 @@ struct macro_info {
     char filename[20];
 };
 
-int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_table_length) {
-    FILE *asm_file = fopen(asm_filename, "r");
+int
+parse_macro(char* asm_filename, struct macro_info** macro_table, int* macro_table_length) {
+    FILE* asm_file = fopen(asm_filename, "r");
 
     if (asm_file == NULL) {
         return 1;
     }
 
-    FILE *macro_file;
+    FILE* macro_file;
 
     char asm_data[ASM_LINE_LENGTH];
     long asm_file_offset = 0;
@@ -33,11 +34,11 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
     int macro_table_index = 0;
 
     while (fgets(asm_data, ASM_LINE_LENGTH, asm_file) != NULL) {
-        char *token = strtok(asm_data, " ,:\n\t");
+        char* token = strtok(asm_data, " ,:\n\t");
 
         // For find macro name.
         // Macro name always exists "KMAC" keyword before.
-        char *token_history = asm_data;
+        char* token_history = asm_data;
 
         while (token != NULL) {
             if (strncmp(token, "KMAC", 4) == 0) {
@@ -79,7 +80,9 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
             fputc('\n', macro_file);
         }
 
-        if (macro_mode > 0) { macro_mode++; }
+        if (macro_mode > 0) {
+            macro_mode++;
+        }
 
         asm_file_offset = ftell(asm_file);
     }
@@ -95,8 +98,9 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
     return 0;
 }
 
-int print_macro(char *macro_filename) {
-    FILE *macro_file = fopen(macro_filename, "r");
+int
+print_macro(char* macro_filename) {
+    FILE* macro_file = fopen(macro_filename, "r");
 
     if (macro_file == NULL) {
         return 1;
@@ -113,8 +117,9 @@ int print_macro(char *macro_filename) {
     return 0;
 }
 
-int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro_table_length) {
-    FILE *asm_file = fopen(asm_filename, "r");
+int
+print_assembly(char* asm_filename, struct macro_info* macro_table, int macro_table_length) {
+    FILE* asm_file = fopen(asm_filename, "r");
 
     if (asm_file == NULL) {
         return 1;
@@ -130,7 +135,7 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
     long asm_file_offset = ftell(asm_file);
 
     while (fgets(asm_data, ASM_LINE_LENGTH, asm_file) != NULL) {
-        char *token;
+        char* token;
 
         token = strtok(asm_data, " \n\t");
 
@@ -201,9 +206,10 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
     return 0;
 }
 
-int main(void) {
+int
+main(void) {
     int macro_table_length = 10;
-    struct macro_info *macro_table = (struct macro_info *) malloc(sizeof(struct macro_info) * macro_table_length);
+    struct macro_info* macro_table = (struct macro_info*)malloc(sizeof(struct macro_info) * macro_table_length);
 
     // PASS 1
     if (parse_macro(ASM_FILENAME, &macro_table, &macro_table_length)) {

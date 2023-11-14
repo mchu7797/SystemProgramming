@@ -7,14 +7,16 @@
 #include <string.h>
 
 #define INPUT_DATA_FILENAME "d.txt"
-#define WORD_MAX_LENGTH 20
+#define WORD_MAX_LENGTH     20
 
-int wordCompare(const void *input1, const void *input2) {
-    return strncmp(*((char **) input1), *((char **) input2), WORD_MAX_LENGTH);
+int
+wordCompare(const void* input1, const void* input2) {
+    return strncmp(*((char**)input1), *((char**)input2), WORD_MAX_LENGTH);
 }
 
-int main(void) {
-    FILE *input = fopen(INPUT_DATA_FILENAME, "r");
+int
+main(void) {
+    FILE* input = fopen(INPUT_DATA_FILENAME, "r");
 
     if (input == NULL) {
         printf("Cannot open '%s'!\n", INPUT_DATA_FILENAME);
@@ -27,14 +29,14 @@ int main(void) {
     inputSize = ftell(input);
     fseek(input, 0, SEEK_SET);
 
-    char *inputBinary = (char *) malloc(inputSize);
-    char **wordList = (char **) malloc(sizeof(char *) * (inputSize - 1));
+    char* inputBinary = (char*)malloc(inputSize);
+    char** wordList = (char**)malloc(sizeof(char*) * (inputSize - 1));
 
     fread(inputBinary, sizeof(char), inputSize, input);
 
     int wordListLength = 0;
 
-    char *wordToken = strtok(inputBinary, " \n");
+    char* wordToken = strtok(inputBinary, " \n");
     while (wordToken) {
         *(wordList + wordListLength) = wordToken;
         wordListLength++;
@@ -42,7 +44,7 @@ int main(void) {
         wordToken = strtok(NULL, " \n");
     }
 
-    qsort(wordList, wordListLength, sizeof(char *), wordCompare);
+    qsort(wordList, wordListLength, sizeof(char*), wordCompare);
 
     while (1) {
         char inputKeyword[20];
