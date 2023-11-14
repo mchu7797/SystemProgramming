@@ -10,7 +10,7 @@
 #define ASM_LINE_LENGTH 80
 
 struct macro_info {
-    char keyword[15];
+    char keyword[20];
     char filename[20];
 };
 
@@ -21,31 +21,45 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
         return 1;
     }
 
-    char asm_data[ASM_LINE_LENGTH];
-    long asm_pos = ftell(asm_file);
-
-    int macro_mode = 0;
     FILE *macro_file;
+
+    char asm_data[ASM_LINE_LENGTH];
+    long asm_file_offset = 0;
+
+    // It represents macro block starts and ends
+    // 1 => Macro block starts (Parsing and writing start)
+    // 2 => Macro block ends (Parsing and writing end)
+    int macro_mode = 0;
+    int macro_table_index = 0;
 
     while (fgets(asm_data, ASM_LINE_LENGTH, asm_file) != NULL) {
         char *token = strtok(asm_data, " ,:\n\t");
+
+        // For find macro name.
+        // Macro name always exists "KMAC" keyword before.
         char *token_history = asm_data;
 
         while (token != NULL) {
             if (strncmp(token, "KMAC", 4) == 0) {
-                char macro_keyword[20];
-                strcpy(macro_keyword, token_history);
+                if (macro_table_index >= *macro_table_length) {
+                    return 1;
+                }
 
-                strcpy((*macro_table)[*macro_table_length].keyword, macro_keyword);
-                strcat(macro_keyword, ".TXT");
-                strcpy((*macro_table)[*macro_table_length].filename, macro_keyword);
+                strcpy((*macro_table)[macro_table_index].keyword, token_history);
+                strcpy((*macro_table)[macro_table_index].filename, token_history);
+                strcat((*macro_table)[macro_table_index].filename, ".TXT");
 
-                macro_file = fopen((*macro_table)[*macro_table_length].filename, "w");
+                macro_file = fopen((*macro_table)[macro_table_index].filename, "w");
+
+                if (macro_file == NULL) {
+                    return 1;
+                }
+
                 macro_mode = 1;
             }
 
             if (strncmp(token, "ENDK", 4) == 0) {
-                (*macro_table_length)++;
+                macro_table_index++;
                 fclose(macro_file);
                 macro_mode = 0;
             }
@@ -55,7 +69,7 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
         }
 
         if (macro_mode > 1) {
-            fseek(asm_file, asm_pos, SEEK_SET);
+            fseek(asm_file, asm_file_offset, SEEK_SET);
             int c;
 
             while ((c = fgetc(asm_file)) != '\n') {
@@ -67,7 +81,7 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
 
         if (macro_mode > 0) { macro_mode++; }
 
-        asm_pos = ftell(asm_file);
+        asm_file_offset = ftell(asm_file);
     }
 
     if (!feof(asm_file)) {
@@ -75,6 +89,8 @@ int parse_macro(char *asm_filename, struct macro_info **macro_table, int *macro_
     }
 
     fclose(asm_file);
+
+    *macro_table_length = macro_table_index;
 
     return 0;
 }
@@ -105,9 +121,8 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
     }
 
     // It represents detected macro calls or macro block
-    // 3 => Macro block starts
-    // 2 => Macro block ends
-    // 1 => Macro call
+    // 2 => Macro block starts
+    // 1 => Macro block ends
     // 0 => Isn't macro
     int macro_flag = 0;
 
@@ -121,7 +136,7 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
 
         while (token != NULL) {
             if (strncmp(token, "KMAC", 4) == 0) {
-                macro_flag = 3;
+                macro_flag = 2;
             }
 
             if (strncmp(token, "ENDK", 4) == 0) {
@@ -170,7 +185,7 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
             putchar('\n');
         }
 
-        if (macro_flag < 3) {
+        if (macro_flag < 2) {
             macro_flag = 0;
         }
 
@@ -187,15 +202,17 @@ int print_assembly(char *asm_filename, struct macro_info *macro_table, int macro
 }
 
 int main(void) {
-    struct macro_info *macro_table = (struct macro_info *) malloc(sizeof(struct macro_info) * 10);
-    int macro_table_length = 0;
+    int macro_table_length = 10;
+    struct macro_info *macro_table = (struct macro_info *) malloc(sizeof(struct macro_info) * macro_table_length);
 
+    // PASS 1
     if (parse_macro(ASM_FILENAME, &macro_table, &macro_table_length)) {
         // If execution does not work properly
         puts("Execution Failed : PARSING MACRO");
         return 1;
     }
 
+    // PASS 2
     if (print_assembly(ASM_FILENAME, macro_table, macro_table_length)) {
         // If execution does not work properly
         puts("Execution Failed : PRINTING ASSEMBLY");

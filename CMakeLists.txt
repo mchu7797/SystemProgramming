@@ -11,7 +11,8 @@ add_executable(Week5 c-code/week5.c)
 add_executable(Week6 c-code/week6.c)
 add_executable(MiddleExam8 c-code/middle-exam-8.c)
 add_executable(Week9 c-code/week9.c)
-add_executable(Week10 c-code/week10.c)
+add_executable(Week10 c-code/week10.c
+        c-code/week10.h)
 
 # for execute week2
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/fruits.txt ${CMAKE_CURRENT_BINARY_DIR}/fruits.txt COPYONLY)
@@ -27,3 +28,6 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/week9.asm ${CMAKE_CURRENT_BINA
 
 # For execute week10
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/week10.asm ${CMAKE_CURRENT_BINARY_DIR}/week10.asm COPYONLY)
+
+add_executable(Assembler assembler/keyword_table.h
+        assembler/assembler.c)

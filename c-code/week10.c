@@ -6,42 +6,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "week10.h"
+
 #define ASM_FILENAME "week10.asm"
-
-#define KEYWORD_LENGTH 10
-#define COMMAND_LIST_LENGTH 12
-#define BYTE_REGISTER_LIST_LENGTH 8
-#define WORD_REGISTER_LIST_LENGTH 6
-#define DATA_DEFINE_LIST_LENGTH 2
-#define DIRECTION_LIST_LENGTH 4
-
-char command_list[COMMAND_LIST_LENGTH][KEYWORD_LENGTH] = {
-        "MOV",
-        "ADD", "SUB", "AND", "OR",
-        "INC", "DEC",
-        "CMP",
-        "JMP", "JA", "JB", "JE"
-};
-
-char byte_register_list[BYTE_REGISTER_LIST_LENGTH][KEYWORD_LENGTH] = {
-        "AH", "AL",
-        "BH", "BL",
-        "CH", "CL",
-        "DH", "DL"
-};
-
-char word_register_list[WORD_REGISTER_LIST_LENGTH][KEYWORD_LENGTH] = {
-        "AX", "BX", "CX", "DX",
-        "SI", "DI"
-};
-
-char data_define_list[DATA_DEFINE_LIST_LENGTH][KEYWORD_LENGTH] = {
-        "DW", "DB"
-};
-
-char direction_list[DIRECTION_LIST_LENGTH][KEYWORD_LENGTH] = {
-        "ASSUME", "SEGMENT", "ENDS", "END"
-};
 
 int extract_data_symbol_keywords(char *filename, char *data_symbol_list, int *data_symbol_list_length) {
     FILE *asm_file = fopen(filename, "r");
@@ -98,8 +65,17 @@ int print_assembly_code(char *filename, char* data_symbol_list, int data_symbol_
     char asm_data[80];
 
     while (fgets(asm_data, 80, asm_file) != NULL) {
-        printf("%s", asm_data);
-        printf("PARSED : ");
+        char asm_data_for_print[80];
+        strncpy(asm_data_for_print, asm_data, 80);
+
+        char *print_token = strtok(asm_data_for_print, " \t\n");
+
+        while(print_token != NULL) {
+            printf("%s ", print_token);
+            print_token = strtok(NULL, " \t\n");
+        }
+
+        printf("\n");
 
         char *token = strtok(asm_data, " :,\n\t");
 
@@ -153,7 +129,7 @@ int print_assembly_code(char *filename, char* data_symbol_list, int data_symbol_
             token = strtok(NULL, " :,\n\t");
         }
 
-        printf("\n");
+        printf("(DETECTED)\n");
     }
 
     return 0;
