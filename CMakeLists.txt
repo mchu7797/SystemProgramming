@@ -29,5 +29,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/week9.asm ${CMAKE_CURRENT_BINA
 # For execute week10
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/week10.asm ${CMAKE_CURRENT_BINARY_DIR}/week10.asm COPYONLY)
 
-add_executable(Assembler assembler/keyword_table.h
-        assembler/assembler.c)
+
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/instruction_list.txt ${CMAKE_CURRENT_BINARY_DIR}/instruction_list.txt COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/register_list.txt ${CMAKE_CURRENT_BINARY_DIR}/register_list.txt COPYONLY)
+add_executable(Assembler assembler/assembler.h assembler/assembler.c)
