@@ -240,7 +240,6 @@ PassII(char* buf) {
     else {
         k = 0;
         while (strcmp(Symbol[k].symbol, Sen.label)) {
-            k++;
         }
         if (!strcmp(Symbol[k].word_type, "w")) {
             printf("%04X:%04X %20s", LC, atoi(Symbol[k].data), buf);
