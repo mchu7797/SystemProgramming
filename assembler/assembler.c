@@ -13,9 +13,9 @@
 #define RAW_CODE_LENGTH 50
 
 /* Command information tables */
-register_t registers[50];
-instruction_t instructions[100];
-symbol_t symbols[100];
+register_info_t registers[50];
+instruction_info_t instructions[100];
+symbol_info_t symbols[100];
 
 /* Command information table's current length */
 int32_t registers_length;
@@ -126,7 +126,7 @@ analyze_operand(char* operand) {
 }
 
 errno_t
-parse_assembly(char* raw_code, instruction_t* instruction_info, asm_code_t* parsed_code) {
+parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentence_t* parsed_code) {
     /* Cut raw string to keywords */
     /* Assembly basic syntax: [Label] Mnemonic [Operands] [;Comments] */
     char raw_code_copied[RAW_CODE_LENGTH], *keywords[5], *token;
@@ -237,8 +237,8 @@ parse_assembly(char* raw_code, instruction_t* instruction_info, asm_code_t* pars
 
 errno_t
 assemble_first(FILE* input_file) {
-    instruction_t instruction;
-    asm_code_t asm_code;
+    instruction_info_t instruction;
+    asm_sentence_t asm_code;
 
     char raw_code[RAW_CODE_LENGTH];
     int32_t is_data_declare, location;
@@ -253,6 +253,7 @@ assemble_first(FILE* input_file) {
     while (fgets(raw_code, RAW_CODE_LENGTH, input_file) != NULL) {
         is_data_declare = 0;
 
+        /* When instruction found from instruction table */
         if (!parse_assembly(raw_code, &instruction, &asm_code)) {
             printf("%04X:%s", location, raw_code);
             location += strtol(instruction.instruction_code_length, NULL, 10);
@@ -294,8 +295,8 @@ assemble_first(FILE* input_file) {
 
 errno_t
 assemble_second(FILE* input_file, FILE* output_file) {
-    instruction_t instruction;
-    asm_code_t asm_code;
+    instruction_info_t instruction;
+    asm_sentence_t asm_code;
 
     char raw_code[RAW_CODE_LENGTH], address[3], number[3];
     int32_t location, i;
@@ -350,7 +351,8 @@ assemble_second(FILE* input_file, FILE* output_file) {
                         memset(address, 0, 3);
                         byte_to_binary(symbols[i].binary_offset, address);
 
-                        printf("%02X %01X%01X %s", binary_to_int(instruction.mod_reg), address[0], address[1], raw_code);
+                        printf("%02X %02X %02X %s", binary_to_int(instruction.mod_reg), address[0], address[1],
+                               raw_code);
                         fputc(binary_to_int(instruction.mod_reg), output_file);
                         fwrite(address, 2, 1, output_file);
                     }
@@ -363,7 +365,8 @@ assemble_second(FILE* input_file, FILE* output_file) {
                         memset(address, 0, 3);
                         byte_to_binary(symbols[i].binary_offset, address);
 
-                        printf("%02X %01X%01X %s", binary_to_int(instruction.mod_reg), address[0], address[1], raw_code);
+                        printf("%02X %02X %02X %s", binary_to_int(instruction.mod_reg), address[0], address[1],
+                               raw_code);
                         fputc(binary_to_int(instruction.mod_reg), output_file);
                         fwrite(address, 2, 1, output_file);
                     }

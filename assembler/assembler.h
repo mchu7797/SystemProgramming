@@ -11,7 +11,7 @@ typedef struct {
     char name[3];
     char word_type[2];
     char number[4];
-} register_t;
+} register_info_t;
 
 typedef struct {
     char instruction[6];
@@ -22,19 +22,19 @@ typedef struct {
     char instruction_code_length[2];
     char instruction_code_fixed[2];
     char mod_reg[9];
-} instruction_t;
+} instruction_info_t;
 
 typedef struct {
     char name[10];
     char word_type[2];
     int32_t binary_offset;
     char data[10];
-} symbol_t;
+} symbol_info_t;
 
 typedef struct {
     char label[10];
     char operator[10];
     char operand[3][10];
-} asm_code_t;
+} asm_sentence_t;
 
 #endif //ASSEMBLER_H
