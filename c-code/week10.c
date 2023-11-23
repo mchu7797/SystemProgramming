@@ -2,6 +2,10 @@
 // Created by Minseok Chu on 2023-11-08.
 //
 
+// 추가 과제
+// PASS 1 : 주소값을 저장하는 심볼 테이블을 저장, 주소값은 단어 갯수로 카운팅하기로 합시다.
+// PASS 2 : 심볼과 라벨을 출력할 떄, 주소 값도 같이 출력해야 함. Label은 출력에서 생략.
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>

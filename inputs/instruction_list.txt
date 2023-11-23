@@ -6,3 +6,16 @@ MOV r r b 8A 2 11??????
 MOV r r w 8B 2 11??????
 MOV m i b C6 5 00000110
 MOV m i w C7 6 00000110
+MOV r i b C6 3 11000???
+MOV r i w C7 4 11000???
+INC r n b FE 2 11000???
+INC r n w FF 2 11000???
+INC m n b FE 4 00000110
+INC m n w FF 4 00000110
+DEC r n b FE 2 11001???
+DEC r n w FF 2 11001???
+DEC m n b FE 4 00001110
+DEC m n w FF 4 00001110
+JMP m n n E9 3 n
+JE  m n n 74 3 n
+JB  m n n 72 3 n

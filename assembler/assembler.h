@@ -27,7 +27,7 @@ typedef struct {
 typedef struct {
     char name[10];
     char word_type[2];
-    int32_t binary_offset;
+    int64_t binary_offset;
     char data[10];
 } symbol_info_t;
 
@@ -36,5 +36,12 @@ typedef struct {
     char operator[10];
     char operand[3][10];
 } asm_sentence_t;
+
+char assembler_keywords[4] =  {
+    "ASSUME",
+    "SEGMENT",
+    "ENDS",
+    "END"
+};
 
 #endif //ASSEMBLER_H
