@@ -16,6 +16,9 @@ DEC r n b FE 2 11001???
 DEC r n w FF 2 11001???
 DEC m n b FE 4 00001110
 DEC m n w FF 4 00001110
-JMP m n n E9 3 n
-JE  m n n 74 3 n
-JB  m n n 72 3 n
+JMP m n b FF 4 00100110
+JMP m n w FF 4 00100110
+JE  m n b 74 3 n
+JE  m n w 74 3 n
+JB  m n b 72 3 n
+JB  m n w 72 3 n

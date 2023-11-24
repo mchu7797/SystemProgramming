@@ -74,29 +74,42 @@ word_to_binary(uint32_t input, uint8_t* output) {
 
 uint32_t
 string_to_int(char* string_text) {
+    int32_t is_dec, is_hex, i;
     char* string_ends;
-    int32_t i, is_hex;
 
+    is_dec = 1;
+    is_hex = 1;
     i = 0;
-    is_hex = 0;
-    string_ends = strchr(string_text, 'H');
 
-    while (&string_text[i] != string_ends) {
-        if (isdigit(string_text[i])) {
-            ++i;
-        } else if (isxdigit(string_text[i])) {
-            is_hex = 1;
-            ++i;
-        } else {
-            return 0;
+    if (string_text[0] == 0) {
+        return -1;
+    }
+
+    while (string_text[i] != '\0') {
+        if (!isdigit(string_text[i])) {
+            is_dec = 0;
         }
+
+        if (!isxdigit(string_text[i])) {
+            if (string_text[i] == 'H' || string_text[i] == 'h') {
+                string_ends = &string_text[i];
+            } else {
+                is_hex = 0;
+            }
+        }
+
+        ++i;
+    }
+
+    if (is_dec) {
+        return (uint32_t)strtol(string_text, NULL, 10);
     }
 
     if (is_hex) {
-        return strtol(string_text, &string_ends, 16);
-    } else {
-        return strtol(string_text, NULL, 10);
+        return (uint32_t)strtol(string_text, &string_ends, 16);
     }
+
+    return -1;
 }
 
 uint32_t
@@ -139,7 +152,7 @@ analyze_operand(char* operand) {
 
     num = string_to_int(operand);
 
-    if (num != 0) {
+    if (num != -1) {
         if (num > 255) {
             return 2;
         } else {
@@ -156,8 +169,30 @@ analyze_operand(char* operand) {
     }
 }
 
+int32_t
+check_word_type_from_symbols(char* symbol_name) {
+    int32_t i;
+
+    for (i = 0; i < symbols_length; ++i) {
+        if (strncmp(symbols[i].name, symbol_name, 10) != 0) {
+            continue;
+        }
+
+        if (symbols[i].word_type[0] == 'w') {
+            return 0;
+        }
+
+        if (symbols[i].word_type[0] == 'b') {
+            return 1;
+        }
+    }
+
+    return -1;
+}
+
 errno_t
-parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentence_t* parsed_code) {
+parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentence_t* parsed_code,
+               int32_t check_symbols) {
     /* Cut raw string to keywords */
     /* Assembly basic syntax: [Label] Mnemonic [Operands] [;Comments] */
     char raw_code_copied[RAW_CODE_LENGTH], *keywords[5], *token;
@@ -223,10 +258,7 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
             strcpy(instruction_info->destination_memory, "i");
             strcpy(instruction_info->word_type, "b");
             break;
-        case 4:
-            strcpy(instruction_info->destination_memory, "m");
-            strcpy(instruction_info->word_type, "n");
-            break;
+        case 4: strcpy(instruction_info->destination_memory, "m"); break;
         default: strcpy(instruction_info->destination_memory, "n"); break;
     }
 
@@ -249,6 +281,34 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
             break;
         case 4: strcpy(instruction_info->source_memory, "m"); break;
         default: strcpy(instruction_info->source_memory, "n"); break;
+    }
+
+    if (check_symbols) {
+        if (instruction_info->destination_memory[0] == 'm') {
+            switch (check_word_type_from_symbols(parsed_code->operand[0])) {
+                case 0:
+                    strcpy(instruction_info->word_type, "w");
+                    break;
+                case 1:
+                    strcpy(instruction_info->word_type, "b");
+                    break;
+                default:
+                    puts("Can't recognize symbol type!");
+                    return 1;
+            }
+        } else if (instruction_info->source_memory[0] == 'm') {
+            switch (check_word_type_from_symbols(parsed_code->operand[1])) {
+                case 0:
+                    strcpy(instruction_info->word_type, "w");
+                    break;
+                case 1:
+                    strcpy(instruction_info->word_type, "b");
+                    break;
+                default:
+                    puts("Can't recognize symbol type!");
+                    return 1;
+            }
+        }
     }
 
     if (strcmp(instruction_info->destination_memory, "n") == 0 && strcmp(instruction_info->source_memory, "n") == 0) {
@@ -305,7 +365,7 @@ assemble_first(FILE* input_file) {
         is_data_declare = 0;
 
         /* When instruction found from instruction table */
-        if (!parse_assembly(raw_code, &instruction, &asm_code)) {
+        if (!parse_assembly(raw_code, &instruction, &asm_code, 0)) {
             printf("%04llX:%s", location, raw_code);
             location += strtol(instruction.instruction_code_length, NULL, 10);
             continue;
@@ -366,11 +426,11 @@ assemble_second(FILE* input_file, FILE* output_file) {
     }
 
     while (fgets(raw_code, RAW_CODE_LENGTH, input_file) != NULL) {
-        if (!parse_assembly(raw_code, &instruction, &asm_code)) {
+        if (!parse_assembly(raw_code, &instruction, &asm_code, 1)) {
             printf("%04llX:%s ", location, instruction.instruction_code);
             fputc((int32_t)strtol(instruction.instruction_code, NULL, 16), output_file);
 
-            if (strncmp(instruction.destination_memory, "r", 1) == 0) {
+            if (instruction.destination_memory[0] == 'r') {
                 for (i = 0; i < registers_length; ++i) {
                     if (strncmp(registers[i].name, asm_code.operand[0], 3) != 0) {
                         continue;
@@ -380,7 +440,7 @@ assemble_second(FILE* input_file, FILE* output_file) {
                 }
             }
 
-            if (strncmp(instruction.source_memory, "r", 1) == 0) {
+            if (instruction.source_memory[0] == 'r') {
                 for (i = 0; i < registers_length; ++i) {
                     if (strncmp(registers[i].name, asm_code.operand[1], 3) != 0) {
                         continue;
@@ -390,8 +450,8 @@ assemble_second(FILE* input_file, FILE* output_file) {
                 }
             }
 
-            if (strncmp(instruction.word_type, "n", 1) == 0) {
-                if (strncmp(instruction.destination_memory, "m", 1) == 0 && strncmp(instruction.mod_reg, "n", 1) == 0) {
+            if (instruction.word_type[0] == 'n') {
+                if (instruction.destination_memory[0] == 'm' && instruction.mod_reg[0] == 'n') {
                     for (i = 0; i < symbols_length; ++i) {
                         if (strncmp(symbols[i].name, asm_code.operand[0], 10) != 0) {
                             continue;
@@ -410,13 +470,18 @@ assemble_second(FILE* input_file, FILE* output_file) {
                     fputc((int32_t)binary_to_int(instruction.mod_reg), output_file);
                 }
             } else {
-                if (strncmp(instruction.destination_memory, "m", 1) == 0) {
+                if (instruction.destination_memory[0] == 'm') {
                     for (i = 0; i < symbols_length; ++i) {
                         if (strncmp(symbols[i].name, asm_code.operand[0], 10) != 0) {
                             continue;
                         }
 
-                        strncpy(instruction.word_type, symbols[i].word_type, 1);
+                        if (instruction.word_type[0] != symbols[i].word_type[0]) {
+                            puts("\nNot same word type between symbol and other operand!");
+                            return 1;
+                        } else {
+                            strncpy(instruction.word_type, symbols[i].word_type, 2);
+                        }
 
                         memset(address, 0, 3);
                         word_to_binary(symbols[i].binary_offset, address);
@@ -425,13 +490,18 @@ assemble_second(FILE* input_file, FILE* output_file) {
                         fputc((int32_t)binary_to_int(instruction.mod_reg), output_file);
                         fwrite(address, 2, 1, output_file);
                     }
-                } else if (strncmp(instruction.source_memory, "m", 1) == 0) {
+                } else if (instruction.source_memory[0] == 'm') {
                     for (i = 0; i < symbols_length; ++i) {
                         if (strncmp(symbols[i].name, asm_code.operand[1], 10) != 0) {
                             continue;
                         }
 
-                        strncpy(instruction.word_type, symbols[i].word_type, 1);
+                        if (instruction.word_type[0] != symbols[i].word_type[0]) {
+                            puts("Not same word type between symbol and other operand!");
+                            return 1;
+                        } else {
+                            strncpy(instruction.word_type, symbols[i].word_type, 2);
+                        }
 
                         memset(address, 0, 3);
                         word_to_binary(symbols[i].binary_offset, address);
@@ -447,7 +517,7 @@ assemble_second(FILE* input_file, FILE* output_file) {
 
                 memset(number, 0, 3);
 
-                if (strncmp(instruction.destination_memory, "i", 1) == 0) {
+                if (instruction.destination_memory[0] == 'i') {
                     switch (instruction.word_type[0]) {
                         case 'w':
                             word_to_binary(string_to_int(asm_code.operand[0]), number);
@@ -461,7 +531,7 @@ assemble_second(FILE* input_file, FILE* output_file) {
                             break;
                         default: break;
                     }
-                } else if (strncmp(instruction.source_memory, "i", 1) == 0) {
+                } else if (instruction.source_memory[0] == 'i') {
                     switch (instruction.word_type[0]) {
                         case 'w':
                             word_to_binary(string_to_int(asm_code.operand[1]), number);
@@ -490,24 +560,18 @@ assemble_second(FILE* input_file, FILE* output_file) {
 
                 memset(number, 0, 3);
 
-                if (strncmp(symbols[i].word_type, "w", 1) == 0) {
+                if (strncmp(asm_code.operator, "DW", 2) == 0) {
                     word_to_binary(string_to_int(symbols[i].data), number);
                     printf("%04llX:%02X %02X %s", location, number[0], number[1], raw_code);
-                    fputc((int32_t)location, output_file);
                     fwrite(number, 2, 1, output_file);
+                    location += 2;
                 }
 
-                if (strncmp(symbols[i].word_type, "b", 1) == 0) {
+                if (strncmp(asm_code.operator, "DB", 2) == 0) {
                     byte_to_binary(string_to_int(symbols[i].data), number);
                     printf("%04llX:%02X %s", location, number[0], raw_code);
-                    fputc((int32_t)location, output_file);
                     fwrite(number, 1, 1, output_file);
-                }
-
-                if (*(symbols[i].word_type) == 'w') {
-                    location += 2;
-                } else if (*(symbols[i].word_type) == 'b') {
-                    location += 1;
+                    ++location;
                 }
             }
         }

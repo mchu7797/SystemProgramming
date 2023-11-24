@@ -37,11 +37,6 @@ typedef struct {
     char operand[3][10];
 } asm_sentence_t;
 
-char assembler_keywords[4] =  {
-    "ASSUME",
-    "SEGMENT",
-    "ENDS",
-    "END"
-};
+char assembler_keywords[4][10] = {"ASSUME", "SEGMENT", "ENDS", "END"};
 
 #endif //ASSEMBLER_H
