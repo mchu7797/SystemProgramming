@@ -59,7 +59,7 @@ init() {
 
 errno_t
 find_symbols(FILE* assembly_file) {
-    int32_t i, is_symbol, binary_location;
+    int32_t i, is_symbol, binary_location, symbol_duplicated;
     char raw_code[80], *token;
 
     if (assembly_file == NULL) {
@@ -77,7 +77,6 @@ find_symbols(FILE* assembly_file) {
                 continue;
             }
 
-            ++binary_location;
             is_symbol = 1;
 
             for (i = 0; i < instruction_table_length; ++i) {
@@ -88,18 +87,63 @@ find_symbols(FILE* assembly_file) {
             }
 
             for (i = 0; i < register_table_length; ++i) {
-                if (strncmp(register_table[i].name, token, 3) == 0) {
+                if (strncmp(register_table[i].name, token, 3) != 0) {
                     continue;
                 }
                 is_symbol = 0;
             }
 
-            if (is_symbol) {
-                strncpy(symbol_table[symbol_table_length].name, token, 15);
-                symbol_table[symbol_table_length].binary_offset = binary_location;
-                ++symbol_table_length;
+            for (i = 0; i < DATA_INIT_KEYWORDS_LENGTH; ++i) {
+                if (strcmp(data_init_keywords[i], token) != 0) {
+                    continue;
+                }
+                is_symbol = 0;
             }
 
+            for (i = 0; i < RESERVED_WORDS_LENGTH; ++i) {
+                if (strcmp(reserved_words[i], token) != 0) {
+                    continue;
+                }
+                is_symbol = 0;
+            }
+
+            i = 0;
+
+            while (token[i] != 0) {
+                if (!isxdigit(token[i]) && token[i] != 'H' && token[i] != 'h') {
+                    break;
+                } else {
+                    ++i;
+                }
+            }
+
+            if (token[i] == 0) {
+                is_symbol = 0;
+            }
+
+            if (is_symbol) {
+                symbol_duplicated = 0;
+
+                for (i = 0; i < symbol_table_length; ++i) {
+                    if (symbol_table[i].name[0] == 0) {
+                        continue;
+                    }
+
+                    if (strncmp(symbol_table[i].name, token, 15) != 0) {
+                        continue;
+                    }
+
+                    symbol_duplicated = 1;
+                }
+
+                if (!symbol_duplicated) {
+                    strncpy(symbol_table[symbol_table_length].name, token, 15);
+                    symbol_table[symbol_table_length].binary_offset = binary_location;
+                    ++symbol_table_length;
+                }
+            }
+
+            ++binary_location;
             token = strtok(NULL, ASSEMBLY_KEYWORD_DELIMETER);
         }
     }
@@ -145,7 +189,7 @@ translate_binary(FILE* assembly_file) {
                     continue;
                 }
 
-                printf("[%02X]", symbol_table[i].binary_offset);
+                printf("[%02X] ", symbol_table[i].binary_offset);
                 is_translated = 1;
             }
 
