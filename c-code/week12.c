@@ -61,7 +61,7 @@ int32_t
 is_numeric(char* string) {
     int32_t i = 0;
 
-    /* 16진수는 무조건 0 또는 다른 숫자로 시작해야 함. */ 
+    /* 16진수는 무조건 0 또는 다른 숫자로 시작해야 함. */
     if (!isdigit(string[0])) {
         return 0;
     }
@@ -166,7 +166,7 @@ find_symbols(FILE* assembly_file) {
 }
 
 errno_t
-translate_binary(FILE* assembly_file) {
+translate_to_binary(FILE* assembly_file) {
     int32_t i;
     char raw_code[80], *token;
 
@@ -256,7 +256,7 @@ main() {
 
     rewind(input_file);
 
-    if (translate_binary(input_file)) {
+    if (translate_to_binary(input_file)) {
         printf("'%s'을/를 변환하는 도중 오류가 발생했습니다!\n", input_filename);
         return EXIT_FAILURE;
     }
