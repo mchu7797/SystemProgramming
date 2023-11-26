@@ -57,6 +57,30 @@ init() {
     return 0;
 }
 
+int32_t
+is_numeric(char* string) {
+    int32_t i = 0;
+
+    /* 16진수는 무조건 0 또는 다른 숫자로 시작해야 함. */ 
+    if (!isdigit(string[0])) {
+        return 0;
+    }
+
+    while (string[i] != 0) {
+        if (!isxdigit(string[i]) && string[i] != 'H' && string[i] != 'h') {
+            break;
+        } else {
+            ++i;
+        }
+    }
+
+    if (string[i] == 0) {
+        return 1;
+    }
+
+    return 0;
+}
+
 errno_t
 find_symbols(FILE* assembly_file) {
     int32_t i, is_symbol, binary_location, symbol_duplicated;
@@ -107,17 +131,7 @@ find_symbols(FILE* assembly_file) {
                 is_symbol = 0;
             }
 
-            i = 0;
-
-            while (token[i] != 0) {
-                if (!isxdigit(token[i]) && token[i] != 'H' && token[i] != 'h') {
-                    break;
-                } else {
-                    ++i;
-                }
-            }
-
-            if (token[i] == 0) {
+            if (is_numeric(token)) {
                 is_symbol = 0;
             }
 
@@ -153,7 +167,7 @@ find_symbols(FILE* assembly_file) {
 
 errno_t
 translate_binary(FILE* assembly_file) {
-    int32_t i, is_translated;
+    int32_t i;
     char raw_code[80], *token;
 
     if (assembly_file == NULL) {
@@ -164,15 +178,12 @@ translate_binary(FILE* assembly_file) {
         token = strtok(raw_code, ASSEMBLY_KEYWORD_DELIMETER);
 
         while (token != NULL) {
-            is_translated = 0;
-
             for (i = 0; i < instruction_table_length; ++i) {
                 if (strncmp(instruction_table[i].name, token, 6) != 0) {
                     continue;
                 }
 
                 printf("%02X ", instruction_table[i].output_binary);
-                is_translated = 1;
             }
 
             for (i = 0; i < register_table_length; ++i) {
@@ -181,7 +192,6 @@ translate_binary(FILE* assembly_file) {
                 }
 
                 printf("%02X ", register_table[i].output_binary);
-                is_translated = 1;
             }
 
             for (i = 0; i < symbol_table_length; ++i) {
@@ -190,7 +200,6 @@ translate_binary(FILE* assembly_file) {
                 }
 
                 printf("[%02X] ", symbol_table[i].binary_offset);
-                is_translated = 1;
             }
 
             for (i = 0; i < DATA_INIT_KEYWORDS_LENGTH; ++i) {
@@ -199,7 +208,6 @@ translate_binary(FILE* assembly_file) {
                 }
 
                 printf("DIREC ");
-                is_translated = 1;
             }
 
             for (i = 0; i < RESERVED_WORDS_LENGTH; ++i) {
@@ -208,22 +216,10 @@ translate_binary(FILE* assembly_file) {
                 }
 
                 printf("DIREC ");
-                is_translated = 1;
             }
 
-            if (!is_translated) {
-                i = 0;
-
-                while (token[i] != '\0') {
-                    if (!isxdigit(token[i]) && token[i] != 'H' && token[i] != 'h') {
-                        break;
-                    }
-                    ++i;
-                }
-
-                if (token[i] == '\0') {
-                    printf("%s", token);
-                }
+            if (is_numeric(token)) {
+                printf("%s", token);
             }
 
             token = strtok(NULL, ASSEMBLY_KEYWORD_DELIMETER);
