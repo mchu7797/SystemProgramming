@@ -286,27 +286,15 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
     if (check_symbols) {
         if (instruction_info->destination_memory[0] == 'm') {
             switch (check_word_type_from_symbols(parsed_code->operand[0])) {
-                case 0:
-                    strcpy(instruction_info->word_type, "w");
-                    break;
-                case 1:
-                    strcpy(instruction_info->word_type, "b");
-                    break;
-                default:
-                    puts("Can't recognize symbol type!");
-                    return 1;
+                case 0: strcpy(instruction_info->word_type, "w"); break;
+                case 1: strcpy(instruction_info->word_type, "b"); break;
+                default: puts("Can't recognize symbol type!"); return 1;
             }
         } else if (instruction_info->source_memory[0] == 'm') {
             switch (check_word_type_from_symbols(parsed_code->operand[1])) {
-                case 0:
-                    strcpy(instruction_info->word_type, "w");
-                    break;
-                case 1:
-                    strcpy(instruction_info->word_type, "b");
-                    break;
-                default:
-                    puts("Can't recognize symbol type!");
-                    return 1;
+                case 0: strcpy(instruction_info->word_type, "w"); break;
+                case 1: strcpy(instruction_info->word_type, "b"); break;
+                default: puts("Can't recognize symbol type!"); return 1;
             }
         }
     }

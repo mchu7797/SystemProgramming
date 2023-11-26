@@ -11,8 +11,8 @@ add_executable(Week5 c-code/week5.c)
 add_executable(Week6 c-code/week6.c)
 add_executable(MiddleExam8 c-code/middle-exam-8.c)
 add_executable(Week9 c-code/week9.c)
-add_executable(Week10 c-code/week10.c
-        c-code/week10.h)
+add_executable(Week10 c-code/week10.c c-code/week10.h)
+add_executable(Week12 c-code/week12.c c-code/week12.h)
 
 # for execute week2
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/fruits.txt ${CMAKE_CURRENT_BINARY_DIR}/fruits.txt COPYONLY)
@@ -29,6 +29,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/week9.asm ${CMAKE_CURRENT_BINA
 # For execute week10
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/week10.asm ${CMAKE_CURRENT_BINARY_DIR}/week10.asm COPYONLY)
 
+# For execute week12
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/instruction_12.txt ${CMAKE_CURRENT_BINARY_DIR}/instruction_12.txt COPYONLY)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/register_12.txt ${CMAKE_CURRENT_BINARY_DIR}/register_12.txt COPYONLY)
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/instruction_list.txt ${CMAKE_CURRENT_BINARY_DIR}/instruction_list.txt COPYONLY)
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/inputs/register_list.txt ${CMAKE_CURRENT_BINARY_DIR}/register_list.txt COPYONLY)
