@@ -59,7 +59,7 @@ init() {
 
 errno_t
 find_symbols(FILE* assembly_file) {
-    int32_t i, j, is_symbol, binary_location;
+    int32_t i, is_symbol, binary_location;
     char raw_code[80], *token;
 
     if (assembly_file == NULL) {
@@ -109,7 +109,7 @@ find_symbols(FILE* assembly_file) {
 
 errno_t
 translate_binary(FILE* assembly_file) {
-    int32_t i, j, is_translated;
+    int32_t i, is_translated;
     char raw_code[80], *token;
 
     if (assembly_file == NULL) {
