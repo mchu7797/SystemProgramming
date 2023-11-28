@@ -7,6 +7,8 @@
 
 #include <stdint.h>
 
+#define RESERVED_WORDS_LENGTH 4
+
 typedef struct {
     char name[3];
     char word_type[2];
@@ -37,6 +39,6 @@ typedef struct {
     char operand[3][10];
 } asm_sentence_t;
 
-char assembler_keywords[4][10] = {"ASSUME", "SEGMENT", "ENDS", "END"};
+char* reserved_words[4] = {"ASSUME", "SEGMENT", "ENDS", "END"};
 
 #endif //ASSEMBLER_H

@@ -1,23 +1,23 @@
 # Assembler Spec
 ## Instruction Set
- - MOV
- - ADD
- - SUB
- - AND
- - OR
- - INC
- - DEC
- - CMP
- - JMP
- - JA
- - JB
- - JE
- - DW
- - DB
- - ASSUME
- - SEGMENT
- - ENDS
- - END
+ - MOV     (Implemented)
+ - ADD     (Implemented)
+ - SUB     (Implemented)
+ - AND     (Implemented)
+ - OR      (Implemented)
+ - INC     (Implemented)
+ - DEC     (Implemented)
+ - CMP     (Implemented)
+ - JMP     (Implemented)
+ - JA      (Implemented)
+ - JB      (Implemented)
+ - JE      (Implemented)
+ - DW      (Implemented)
+ - DB      (Implemented)
+ - ASSUME  (Implemented)
+ - SEGMENT (Implemented)
+ - ENDS    (Implemented)
+ - END     (Implemented)
 ## Instruction Format
  - Operator Number
  - Operator Memory

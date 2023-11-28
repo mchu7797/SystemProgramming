@@ -136,8 +136,26 @@ analyze_operand(char* operand) {
     int32_t i;
     uint32_t num;
 
+    if (strcmp(operand, "CS") == 0) {
+        return 8;
+    }
+
+    if (strcmp(operand, "DS") == 0) {
+        return 9;
+    }
+
     for (i = 0; i < registers_length; i++) {
-        if (strncmp(operand, registers[i].name, 3) == 0) {
+        if (operand[0] == '[' && strncmp(operand + 1, registers[i].name, 3) == 0) {
+            if (strncmp(registers[i].word_type, "w", 1) == 0) {
+                /* Is word register pointer */
+                return 6;
+            }
+
+            if (strncmp(registers[i].word_type, "b", 1) == 0) {
+                /* Is byte register pointer */
+                return 7;
+            }
+        } else if (strncmp(operand, registers[i].name, 3) == 0) {
             if (strncmp(registers[i].word_type, "w", 1) == 0) {
                 /* Is word register */
                 return 0;
@@ -160,7 +178,7 @@ analyze_operand(char* operand) {
         }
     }
 
-    if (strcmp(operand, "") != 0) {
+    if (operand[0] != '\0') {
         /* Is memory */
         return 4;
     } else {
@@ -190,13 +208,14 @@ check_word_type_from_symbols(char* symbol_name) {
     return -1;
 }
 
+/* Cut raw string to keywords */
+/* Assembly basic syntax: [Label] Mnemonic [Operands] [;Comments] */
 errno_t
 parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentence_t* parsed_code,
                int32_t check_symbols) {
-    /* Cut raw string to keywords */
-    /* Assembly basic syntax: [Label] Mnemonic [Operands] [;Comments] */
+
+    int32_t keywords_length, is_data_alloc, i, j, k;
     char raw_code_copied[RAW_CODE_LENGTH], *keywords[5], *token;
-    int32_t keywords_length, i, j, k;
 
     keywords_length = 0;
 
@@ -223,8 +242,12 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
     k = 0;
 
     if (i == instructions_length) {
-        strcpy(parsed_code->label, keywords[0]);
-        strcpy(parsed_code->operator, keywords[1]);
+        if (keywords[1] != NULL) {
+            strcpy(parsed_code->label, keywords[0]);
+            strcpy(parsed_code->operator, keywords[1]);
+        } else {
+            strcpy(parsed_code->operator, keywords[0]);
+        }
         ++j;
     }
 
@@ -240,6 +263,12 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
     }
 
     strcpy(instruction_info->instruction, parsed_code->operator);
+
+    for (i = 0; i < RESERVED_WORDS_LENGTH; ++i) {
+        if (strcmp(reserved_words[i], parsed_code->operator) == 0) {
+            return 1;
+        }
+    }
 
     switch (analyze_operand(parsed_code->operand[0])) {
         case 0:
@@ -259,6 +288,22 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
             strcpy(instruction_info->word_type, "b");
             break;
         case 4: strcpy(instruction_info->destination_memory, "m"); break;
+        case 6:
+            strcpy(instruction_info->destination_memory, "p");
+            strcpy(instruction_info->word_type, "w");
+            break;
+        case 7:
+            strcpy(instruction_info->destination_memory, "p");
+            strcpy(instruction_info->word_type, "b");
+            break;
+        case 8:
+            strcpy(instruction_info->destination_memory, "c");
+            strcpy(instruction_info->word_type, "w");
+            break;
+        case 9:
+            strcpy(instruction_info->destination_memory, "d");
+            strcpy(instruction_info->word_type, "w");
+            break;
         default: strcpy(instruction_info->destination_memory, "n"); break;
     }
 
@@ -280,6 +325,22 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
             strcpy(instruction_info->word_type, "b");
             break;
         case 4: strcpy(instruction_info->source_memory, "m"); break;
+        case 6:
+            strcpy(instruction_info->source_memory, "p");
+            strcpy(instruction_info->word_type, "w");
+            break;
+        case 7:
+            strcpy(instruction_info->source_memory, "p");
+            strcpy(instruction_info->word_type, "b");
+            break;
+        case 8:
+            strcpy(instruction_info->source_memory, "c");
+            strcpy(instruction_info->word_type, "w");
+            break;
+        case 9:
+            strcpy(instruction_info->source_memory, "d");
+            strcpy(instruction_info->word_type, "w");
+            break;
         default: strcpy(instruction_info->source_memory, "n"); break;
     }
 
@@ -288,7 +349,13 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
             switch (check_word_type_from_symbols(parsed_code->operand[0])) {
                 case 0: strcpy(instruction_info->word_type, "w"); break;
                 case 1: strcpy(instruction_info->word_type, "b"); break;
-                default: puts("Can't recognize symbol type!"); return 1;
+                default:
+                    if (instruction_info->source_memory[0] != 'n') {
+                        puts("Can't recognize symbol type!");
+                        return 1;
+                    } else {
+                        break;
+                    }
             }
         } else if (instruction_info->source_memory[0] == 'm') {
             switch (check_word_type_from_symbols(parsed_code->operand[1])) {
@@ -330,7 +397,7 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
         }
     }
 
-    return 1;
+    return 2;
 }
 
 errno_t
@@ -339,7 +406,7 @@ assemble_first(FILE* input_file) {
     instruction_info_t instruction;
 
     int64_t location;
-    int32_t is_data_declare;
+    int32_t is_data_declare, parse_response;
     char raw_code[RAW_CODE_LENGTH];
 
     if (input_file == NULL) {
@@ -397,9 +464,10 @@ assemble_second(FILE* input_file, FILE* output_file) {
     instruction_info_t instruction;
     asm_sentence_t asm_code;
 
-    char raw_code[RAW_CODE_LENGTH];
-    uint8_t address[3], number[3];
     int64_t location, i;
+    int32_t parse_result;
+    uint8_t address[3], number[3];
+    char raw_code[RAW_CODE_LENGTH];
 
     location = 0;
 
@@ -414,7 +482,7 @@ assemble_second(FILE* input_file, FILE* output_file) {
     }
 
     while (fgets(raw_code, RAW_CODE_LENGTH, input_file) != NULL) {
-        if (!parse_assembly(raw_code, &instruction, &asm_code, 1)) {
+        if (!(parse_result = parse_assembly(raw_code, &instruction, &asm_code, 1))) {
             printf("%04llX:%s ", location, instruction.instruction_code);
             fputc((int32_t)strtol(instruction.instruction_code, NULL, 16), output_file);
 
@@ -438,25 +506,23 @@ assemble_second(FILE* input_file, FILE* output_file) {
                 }
             }
 
-            if (instruction.word_type[0] == 'n') {
-                if (instruction.destination_memory[0] == 'm' && instruction.mod_reg[0] == 'n') {
-                    for (i = 0; i < symbols_length; ++i) {
-                        if (strncmp(symbols[i].name, asm_code.operand[0], 10) != 0) {
-                            continue;
-                        }
-
-                        strncpy(instruction.word_type, symbols[i].word_type, 1);
-
-                        memset(address, 0, 3);
-                        word_to_binary(symbols[i].binary_offset, address);
-
-                        printf("%02X %02X %s", address[0], address[1], raw_code);
-                        fwrite(address, 2, 1, output_file);
+            if (instruction.destination_memory[0] == 'm' && instruction.source_memory[0] == 'n') {
+                for (i = 0; i < symbols_length; ++i) {
+                    if (strncmp(symbols[i].name, asm_code.operand[0], 10) != 0) {
+                        continue;
                     }
-                } else {
-                    printf("%02X %s", binary_to_int(instruction.mod_reg), raw_code);
-                    fputc((int32_t)binary_to_int(instruction.mod_reg), output_file);
+
+                    strncpy(instruction.word_type, symbols[i].word_type, 1);
+
+                    memset(address, 0, 3);
+                    word_to_binary(symbols[i].binary_offset, address);
+
+                    printf("%02X %02X %s", address[0], address[1], raw_code);
+                    fwrite(address, 2, 1, output_file);
                 }
+            } else if (instruction.destination_memory[0] == 'n' && instruction.source_memory[0] == 'n') {
+                printf("%02X %s", binary_to_int(instruction.mod_reg), raw_code);
+                fputc((int32_t)binary_to_int(instruction.mod_reg), output_file);
             } else {
                 if (instruction.destination_memory[0] == 'm') {
                     for (i = 0; i < symbols_length; ++i) {
@@ -541,6 +607,10 @@ assemble_second(FILE* input_file, FILE* output_file) {
 
             location += strtol(instruction.instruction_code_length, NULL, 10);
         } else {
+            if (parse_result == 1) {
+                continue;
+            }
+
             for (i = 0; i < symbols_length; ++i) {
                 if (strncmp(symbols[i].name, asm_code.label, 10) != 0) {
                     continue;
