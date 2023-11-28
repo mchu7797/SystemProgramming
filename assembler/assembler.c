@@ -223,11 +223,11 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
     memset(keywords, 0, sizeof(char*) * 5);
     strcpy(raw_code_copied, raw_code);
 
-    token = strtok(raw_code_copied, " ,\t\n");
+    token = strtok(raw_code_copied, " ,:\t\n");
 
     while (token != NULL && keywords_length < 5) {
         keywords[keywords_length++] = token;
-        token = strtok(NULL, " ,\t\n");
+        token = strtok(NULL, " ,:\t\n");
     }
 
     for (i = 0; i < instructions_length; ++i) {
@@ -265,7 +265,7 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
     strcpy(instruction_info->instruction, parsed_code->operator);
 
     for (i = 0; i < RESERVED_WORDS_LENGTH; ++i) {
-        if (strcmp(reserved_words[i], parsed_code->operator) == 0) {
+        if (strcmp(reserved_words[i], parsed_code->label) == 0) {
             return 1;
         }
     }
@@ -406,7 +406,6 @@ assemble_first(FILE* input_file) {
     instruction_info_t instruction;
 
     int64_t location;
-    int32_t is_data_declare, parse_response;
     char raw_code[RAW_CODE_LENGTH];
 
     if (input_file == NULL) {
@@ -417,33 +416,33 @@ assemble_first(FILE* input_file) {
     location = 0;
 
     while (fgets(raw_code, RAW_CODE_LENGTH, input_file) != NULL) {
-        is_data_declare = 0;
-
         /* When instruction found from instruction table */
         if (!parse_assembly(raw_code, &instruction, &asm_code, 0)) {
             printf("%04llX:%s", location, raw_code);
+
+            if (asm_code.label[0] != '\0') {
+                strcpy(symbols[symbols_length].name, asm_code.label);
+                symbols[symbols_length].data[0] = '\0';
+                symbols[symbols_length].binary_offset = location;
+                ++symbols_length;
+            }
+
             location += strtol(instruction.instruction_code_length, NULL, 10);
             continue;
         }
 
         if (strncmp(asm_code.operator, "DW", 2) == 0) {
             strcpy(symbols[symbols_length].word_type, "w");
-            is_data_declare = 1;
         }
 
         if (strncmp(asm_code.operator, "DB", 2) == 0) {
             strcpy(symbols[symbols_length].word_type, "b");
-            is_data_declare = 1;
-        }
-
-        if (!is_data_declare) {
-            printf("%04llX:%s", location, raw_code);
-            continue;
         }
 
         strcpy(symbols[symbols_length].name, asm_code.label);
         strcpy(symbols[symbols_length].data, asm_code.operand[0]);
         symbols[symbols_length].binary_offset = location;
+        ++symbols_length;
 
         printf("%04llX:%s", location, raw_code);
 
@@ -452,8 +451,6 @@ assemble_first(FILE* input_file) {
             case 'b': location += 1; break;
             default: break;
         }
-
-        ++symbols_length;
     }
 
     return 0;
