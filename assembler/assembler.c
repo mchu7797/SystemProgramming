@@ -256,7 +256,7 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
         ++k;
     }
 
-    strcpy(instruction_info->instruction, parsed_code->operator);
+    strncpy(instruction_info->instruction, parsed_code->operator, 6);
 
     for (i = 0; i < RESERVED_WORDS_LENGTH; ++i) {
         if (strcmp(reserved_words[i], parsed_code->label) == 0) {
