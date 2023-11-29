@@ -137,25 +137,19 @@ analyze_operand(char* operand) {
     uint32_t num;
 
     if (strcmp(operand, "CS") == 0) {
-        return 8;
+        return 7;
     }
 
     if (strcmp(operand, "DS") == 0) {
-        return 9;
+        return 8;
     }
 
     for (i = 0; i < registers_length; i++) {
-        if (operand[0] == '[' && strncmp(operand + 1, registers[i].name, 3) == 0) {
-            if (strncmp(registers[i].word_type, "w", 1) == 0) {
-                /* Is word register pointer */
+        if (strncmp(operand, registers[i].name, 5) == 0) {
+            if (strncmp(registers[i].word_type, "p", 1) == 0) {
                 return 6;
             }
 
-            if (strncmp(registers[i].word_type, "b", 1) == 0) {
-                /* Is byte register pointer */
-                return 7;
-            }
-        } else if (strncmp(operand, registers[i].name, 3) == 0) {
             if (strncmp(registers[i].word_type, "w", 1) == 0) {
                 /* Is word register */
                 return 0;
@@ -288,23 +282,20 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
             strcpy(instruction_info->word_type, "b");
             break;
         case 4: strcpy(instruction_info->destination_memory, "m"); break;
+        case 5: strcpy(instruction_info->destination_memory, "n"); break;
         case 6:
             strcpy(instruction_info->destination_memory, "p");
             strcpy(instruction_info->word_type, "w");
             break;
         case 7:
-            strcpy(instruction_info->destination_memory, "p");
-            strcpy(instruction_info->word_type, "b");
-            break;
-        case 8:
             strcpy(instruction_info->destination_memory, "c");
             strcpy(instruction_info->word_type, "w");
             break;
-        case 9:
+        case 8:
             strcpy(instruction_info->destination_memory, "d");
             strcpy(instruction_info->word_type, "w");
             break;
-        default: strcpy(instruction_info->destination_memory, "n"); break;
+        default: puts("Cannot parse instruction info!"); return 1;
     }
 
     switch (analyze_operand(parsed_code->operand[1])) {
@@ -325,23 +316,20 @@ parse_assembly(char* raw_code, instruction_info_t* instruction_info, asm_sentenc
             strcpy(instruction_info->word_type, "b");
             break;
         case 4: strcpy(instruction_info->source_memory, "m"); break;
+        case 5: strcpy(instruction_info->source_memory, "n"); break;
         case 6:
             strcpy(instruction_info->source_memory, "p");
             strcpy(instruction_info->word_type, "w");
             break;
         case 7:
-            strcpy(instruction_info->source_memory, "p");
-            strcpy(instruction_info->word_type, "b");
-            break;
-        case 8:
             strcpy(instruction_info->source_memory, "c");
             strcpy(instruction_info->word_type, "w");
             break;
-        case 9:
+        case 8:
             strcpy(instruction_info->source_memory, "d");
             strcpy(instruction_info->word_type, "w");
             break;
-        default: strcpy(instruction_info->source_memory, "n"); break;
+        default: puts("Cannot parse instruction info!"); return 1;
     }
 
     if (check_symbols) {
@@ -483,9 +471,9 @@ assemble_second(FILE* input_file, FILE* output_file) {
             printf("%04llX:%s ", location, instruction.instruction_code);
             fputc((int32_t)strtol(instruction.instruction_code, NULL, 16), output_file);
 
-            if (instruction.destination_memory[0] == 'r') {
+            if (instruction.destination_memory[0] == 'r' || instruction.destination_memory[0] == 'p') {
                 for (i = 0; i < registers_length; ++i) {
-                    if (strncmp(registers[i].name, asm_code.operand[0], 3) != 0) {
+                    if (strncmp(registers[i].name, asm_code.operand[0], 5) != 0) {
                         continue;
                     }
 
@@ -493,9 +481,9 @@ assemble_second(FILE* input_file, FILE* output_file) {
                 }
             }
 
-            if (instruction.source_memory[0] == 'r') {
+            if (instruction.source_memory[0] == 'r' || instruction.source_memory[0] == 'p') {
                 for (i = 0; i < registers_length; ++i) {
-                    if (strncmp(registers[i].name, asm_code.operand[1], 3) != 0) {
+                    if (strncmp(registers[i].name, asm_code.operand[1], 5) != 0) {
                         continue;
                     }
 

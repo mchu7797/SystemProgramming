@@ -10,7 +10,7 @@
 #define RESERVED_WORDS_LENGTH 4
 
 typedef struct {
-    char name[3];
+    char name[5];
     char word_type[2];
     char number[4];
 } register_info_t;
