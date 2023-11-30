@@ -107,6 +107,13 @@ find_symbols(FILE* assembly_file) {
                 if (strncmp(instruction_table[i].name, token, 6) != 0) {
                     continue;
                 }
+
+                if (strncmp(instruction_table[i].name, "MOV", 3) == 0) {
+                    binary_location += 2;
+                } else {
+                    ++binary_location;
+                }
+
                 is_symbol = 0;
             }
 
@@ -114,6 +121,9 @@ find_symbols(FILE* assembly_file) {
                 if (strncmp(register_table[i].name, token, 3) != 0) {
                     continue;
                 }
+
+                ++binary_location;
+
                 is_symbol = 0;
             }
 
@@ -121,6 +131,9 @@ find_symbols(FILE* assembly_file) {
                 if (strcmp(data_init_keywords[i], token) != 0) {
                     continue;
                 }
+
+                ++binary_location;
+
                 is_symbol = 0;
             }
 
@@ -128,10 +141,14 @@ find_symbols(FILE* assembly_file) {
                 if (strcmp(reserved_words[i], token) != 0) {
                     continue;
                 }
+
+                ++binary_location;
+
                 is_symbol = 0;
             }
 
             if (is_numeric(token)) {
+                ++binary_location;
                 is_symbol = 0;
             }
 
@@ -157,7 +174,6 @@ find_symbols(FILE* assembly_file) {
                 }
             }
 
-            ++binary_location;
             token = strtok(NULL, ASSEMBLY_KEYWORD_DELIMETER);
         }
     }
@@ -167,20 +183,31 @@ find_symbols(FILE* assembly_file) {
 
 errno_t
 translate_to_binary(FILE* assembly_file) {
-    int32_t i;
+    int32_t location, i;
     char raw_code[80], *token;
 
     if (assembly_file == NULL) {
         return 1;
     }
 
+    location = 0;
+
     while (fgets(raw_code, 80, assembly_file) != NULL) {
+        printf("ASM :%s", raw_code);
+        printf("%04d:", location);
+
         token = strtok(raw_code, ASSEMBLY_KEYWORD_DELIMETER);
 
         while (token != NULL) {
             for (i = 0; i < instruction_table_length; ++i) {
                 if (strncmp(instruction_table[i].name, token, 6) != 0) {
                     continue;
+                }
+
+                if (strncmp(instruction_table[i].name, "MOV", 3) == 0) {
+                    location += 2;
+                } else {
+                    ++location;
                 }
 
                 printf("%02X ", instruction_table[i].output_binary);
@@ -191,6 +218,8 @@ translate_to_binary(FILE* assembly_file) {
                     continue;
                 }
 
+                ++location;
+
                 printf("%02X ", register_table[i].output_binary);
             }
 
@@ -198,6 +227,8 @@ translate_to_binary(FILE* assembly_file) {
                 if (strncmp(symbol_table[i].name, token, 15) != 0) {
                     continue;
                 }
+
+                ++location;
 
                 printf("[%02X] ", symbol_table[i].binary_offset);
             }
@@ -207,6 +238,8 @@ translate_to_binary(FILE* assembly_file) {
                     continue;
                 }
 
+                ++location;
+
                 printf("DIREC ");
             }
 
@@ -215,11 +248,14 @@ translate_to_binary(FILE* assembly_file) {
                     continue;
                 }
 
+                ++location;
+
                 printf("DIREC ");
             }
 
             if (is_numeric(token)) {
-                printf("%s", token);
+                printf("%s ", token);
+                ++location;
             }
 
             token = strtok(NULL, ASSEMBLY_KEYWORD_DELIMETER);
