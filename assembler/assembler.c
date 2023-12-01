@@ -430,15 +430,16 @@ assemble_first(FILE* input_file) {
         strcpy(symbols[symbols_length].name, asm_code.label);
         strcpy(symbols[symbols_length].data, asm_code.operand[0]);
         symbols[symbols_length].binary_offset = location;
-        ++symbols_length;
-
-        printf("%04llX:%s", location, raw_code);
 
         switch (*symbols[symbols_length].word_type) {
             case 'w': location += 2; break;
             case 'b': location += 1; break;
             default: break;
         }
+
+        ++symbols_length;
+
+        printf("%04llX:%s", location, raw_code);
     }
 
     return 0;
