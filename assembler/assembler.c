@@ -431,7 +431,7 @@ assemble_first(FILE* input_file) {
         strcpy(symbols[symbols_length].data, asm_code.operand[0]);
         symbols[symbols_length].binary_offset = location;
 
-        switch (*symbols[symbols_length].word_type) {
+        switch (symbols[symbols_length].word_type[0]) {
             case 'w': location += 2; break;
             case 'b': location += 1; break;
             default: break;
